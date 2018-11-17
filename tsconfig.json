@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"outDir": "./js",
+		"allowJs": true,
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"target": "es6",
+		"baseUrl": "./ts",
+		"paths": {
+			"@helpers/*": ["helpers/*"],
+			"@models/*": ["models/*"],
+			"@generators/*": ["generators/*"],
+			"@renderers/*": ["renderers/*"]
+		}
+	},
+	"include": ["./ts/**/*"]
+}
