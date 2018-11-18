@@ -1,6 +1,6 @@
-import { CheckValidObject as checkPath, CheckValidObject } from "@helpers/checkobj";
+import { CheckValidObject as checkPath, CheckValidObject } from "helpers/checkobj";
 import ColorParser from "./colorparser";
-import { PowerpointElement, ElementType, TextAlignment, FontAttributes, SpecialityType } from "@models/pptelement";
+import { PowerpointElement, TextAlignment, FontAttributes } from "models/pptelement";
 
 /**
  * Parse the paragraph elements

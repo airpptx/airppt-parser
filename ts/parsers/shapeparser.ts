@@ -1,7 +1,7 @@
-import { CheckValidObject as checkPath } from "@helpers/checkobj";
+import { CheckValidObject as checkPath } from "helpers/checkobj";
 import ColorParser from "./colorparser";
 import LineParser from "./lineparser";
-import { PowerpointElement, ElementType, TextAlignment, FontAttributes, SpecialityType, FillType } from "@models/pptelement";
+import { PowerpointElement, ElementType, SpecialityType } from "models/pptelement";
 
 /**
  * Parse the shape types and etc.

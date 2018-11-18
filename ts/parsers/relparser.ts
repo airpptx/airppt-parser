@@ -1,6 +1,6 @@
 import { CheckValidObject as checkPath, CheckValidObject } from "@helpers/checkobj";
 
-import { PowerpointElement, ElementType, TextAlignment, FontAttributes, SpecialityType, LinkType } from "@models/pptelement";
+import { PowerpointElement, LinkType } from "@models/pptelement";
 import { link } from "fs";
 
 /**

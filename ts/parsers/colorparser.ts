@@ -1,4 +1,4 @@
-import { CheckValidObject as checkPath, CheckValidObject } from "@helpers/checkobj";
+import { CheckValidObject as checkPath, CheckValidObject } from "helpers/checkobj";
 import RelationParser from "./relparser";
 import { PowerpointElement, ElementType, TextAlignment, FontAttributes, SpecialityType, FillType } from "@models/pptelement";
 
