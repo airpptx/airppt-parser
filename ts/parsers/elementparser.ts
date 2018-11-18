@@ -68,7 +68,7 @@ class PowerpointElementParser {
 
 			return pptElement;
 		} catch (e) {
-			console.warn("ERR:", e);
+			console.warn("ERR could not parse element:", e);
 			return null; //skip the element
 		}
 	}

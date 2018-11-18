@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"outDir": "./js",
-		"allowJs": true,
+		"allowJs": false,
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"target": "es6",
@@ -11,7 +11,8 @@
 			"@models/*": ["models/*"],
 			"@generators/*": ["generators/*"],
 			"@renderers/*": ["renderers/*"]
-		}
+		},
+		"declaration": true
 	},
 	"include": ["./ts/**/*"]
 }
