@@ -1,9 +1,8 @@
 require("module-alias/register");
-import ZipHandler from "@helpers/ziphandler";
+import ZipHandler from "./helpers/ziphandler";
 import PowerpointElementParser from "./parsers/elementparser";
 import * as format from "string-template";
-import { PowerpointElement } from "@models/pptelement";
-import { PowerpointDetails } from "@models/pptdetails";
+import { PowerpointDetails } from "./models/pptdetails";
 
 export class AirParser {
 	constructor(private PowerpointFilePath: string) {}
