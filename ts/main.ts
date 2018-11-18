@@ -4,7 +4,7 @@ import PowerpointElementParser from "./parsers/elementparser";
 import * as format from "string-template";
 import { PowerpointElement } from "@models/pptelement";
 
-class AirParser {
+export class AirParser {
 	constructor(private PowerpointFilePath: string, private slideNumber: number) {}
 
 	public async ParsePowerPoint(): Promise<PowerpointElement[]> {
@@ -40,5 +40,3 @@ class AirParser {
 		return allParsedSlideElements;
 	}
 }
-
-export default AirParser;

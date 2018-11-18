@@ -6,7 +6,7 @@
 	"types": "js/main.d.ts",
 	"scripts": {
 		"build": "tsc",
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"test": "./tests/test.js"
 	},
 	"keywords": [
 		"airppt",
@@ -28,9 +28,13 @@
 		"xml2js-es6-promise": "^1.1.1"
 	},
 	"_moduleAliases": {
-		"@helpers": "built/helpers/",
-		"@models": "built/models/",
-		"@generators": "built/generators/",
-		"@renderers": "built/renderers/"
+		"@helpers": "js/helpers/",
+		"@models": "js/models/",
+		"@generators": "js/generators/",
+		"@renderers": "js/renderers/"
+	},
+	"devDependencies": {
+		"chai": "^4.2.0",
+		"mocha": "^5.2.0"
 	}
 }
