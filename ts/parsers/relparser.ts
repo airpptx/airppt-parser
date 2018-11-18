@@ -1,6 +1,6 @@
-import { CheckValidObject as checkPath, CheckValidObject } from "@helpers/checkobj";
+import { CheckValidObject as checkPath, CheckValidObject } from "../helpers/checkobj";
 
-import { PowerpointElement, LinkType } from "@models/pptelement";
+import { PowerpointElement, LinkType } from "../models/pptelement";
 import { link } from "fs";
 
 /**

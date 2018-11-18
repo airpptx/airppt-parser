@@ -1,4 +1,4 @@
-require("module-alias/register");
+//require("module-alias/register");
 import ZipHandler from "./helpers/ziphandler";
 import PowerpointElementParser from "./parsers/elementparser";
 import { PowerpointDetails } from "./models/pptdetails";

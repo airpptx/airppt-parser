@@ -1,5 +1,5 @@
-import { PowerpointElement, BorderType } from "models/pptelement";
-import { CheckValidObject as checkPath } from "helpers/checkobj";
+import { PowerpointElement, BorderType } from "../models/pptelement";
+import { CheckValidObject as checkPath } from "../helpers/checkobj";
 import ColorParser from "./colorparser";
 
 /**
