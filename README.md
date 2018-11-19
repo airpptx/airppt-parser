@@ -21,11 +21,9 @@ After utilizing the parser, we can pass it on to the [renderer module](https://g
 I highly recommend looking at the [tests](https://github.com/airpptx/airppt-parser/tree/master/tests) folder. I continually keep that up-to-date. Be sure to get the latest package from [NPM](https://www.npmjs.com/package/airppt-parser).
 
 ```javascript
-"use strict";
 let { AirParser } = require("airppt-parser");
 
 let pptParser = new AirParser("./sample.pptx");
-
 waitForParsing();
 
 async function waitForParsing() {
@@ -33,7 +31,6 @@ async function waitForParsing() {
 	let result = await pptParser.ParsePowerPoint(1);
 
 	//returns an array of Powerpoint Elements and some extra MetaData
-
 	console.log(result);
 }
 ```
