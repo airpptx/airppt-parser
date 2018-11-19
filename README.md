@@ -1,3 +1,4 @@
+### Project Overview
 Wouldn't it be great if we could use a slideshow canvas as WSIWYG editor to rapidly design and ship UIs or start coding?
 
 This project was built from the ground up to utilize the design elements of PPT presentations and reuse them anywhere. It is built with modularity, extensibility and flexibility in mind whilst abstracting the complexity. It's **not** a direct PPTX -> HTML converter; more like PPTX -> JSON -> HTML instead.
