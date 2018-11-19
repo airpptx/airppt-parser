@@ -1,7 +1,7 @@
 import { CheckValidObject as checkPath, CheckValidObject } from "../helpers/checkobj";
-
-import { PowerpointElement, LinkType } from "../models/pptelement";
 import { link } from "fs";
+
+import { PowerpointElement, LinkType } from "airppt-models/pptelement";
 
 /**
  * Parse everything that deals with relations such as hyperlinks and local images

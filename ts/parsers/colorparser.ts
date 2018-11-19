@@ -1,6 +1,7 @@
 import { CheckValidObject as checkPath, CheckValidObject } from "../helpers/checkobj";
 import RelationParser from "./relparser";
-import { PowerpointElement, FillType } from "../models/pptelement";
+
+import { PowerpointElement, FillType } from "airppt-models/pptelement";
 
 /**
  * Parse the color of elements

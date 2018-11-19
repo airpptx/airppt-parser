@@ -1,6 +1,7 @@
-import { PowerpointElement, BorderType } from "../models/pptelement";
 import { CheckValidObject as checkPath } from "../helpers/checkobj";
 import ColorParser from "./colorparser";
+
+import { PowerpointElement, BorderType } from "airppt-models/pptelement";
 
 /**
  * Parses XML that deals with lines for shapes

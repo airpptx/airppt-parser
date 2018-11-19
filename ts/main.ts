@@ -1,8 +1,8 @@
 //require("module-alias/register");
 import ZipHandler from "./helpers/ziphandler";
 import PowerpointElementParser from "./parsers/elementparser";
-import { PowerpointDetails } from "./models/pptdetails";
 
+import { PowerpointDetails } from "airppt-models/pptdetails";
 import * as format from "string-template";
 
 export class AirParser {
@@ -14,18 +14,21 @@ export class AirParser {
 		let slideShowGlobals = await ZipHandler.parseSlideAttributes("ppt/presentation.xml");
 		let slideShowTheme = await ZipHandler.parseSlideAttributes("ppt/theme/theme1.xml");
 		let pptElementParser = new PowerpointElementParser(slideShowGlobals, slideShowTheme);
+
 		//only get slideAttributes for one slide and return as array
 		let parsedSlideElements = await this.getSlideElements(pptElementParser, slideNumber);
 
 		let pptDetails: PowerpointDetails = {
 			slideShowGlobals,
 			slideShowTheme,
-			powerPointElements: parsedSlideElements
+			powerPointElements: parsedSlideElements,
+			inputPath: this.PowerpointFilePath
 		};
 
 		return pptDetails;
 
-		//TO-DO: Parse All Slides by Default
+		//TO-DO: Add option to parse All Slides by Default
+		//TO-DO: Return the total # as part of a meta property
 	}
 
 	private async getSlideElements(PPTElementParser: PowerpointElementParser, slideNumber) {

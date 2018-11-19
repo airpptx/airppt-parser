@@ -1,9 +1,10 @@
-import { PowerpointElement, ElementType, TextAlignment, FontAttributes, SpecialityType, LinkType } from "@models/pptelement";
-import { CheckValidObject as checkPath, CheckValidObject } from "../helpers/checkobj";
+import { CheckValidObject } from "../helpers/checkobj";
 import ColorParser from "./colorparser";
 import ShapeParser from "./shapeparser";
 import ParagraphParser from "./paragraphparser";
 import SlideRelationsParser from "./relparser";
+
+import { PowerpointElement } from "airppt-models/pptelement";
 
 /**
  * Entry point for all Parsers
