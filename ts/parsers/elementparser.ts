@@ -44,7 +44,7 @@ class PowerpointElementParser {
 			}
 
 			let elementPosition = this.element["p:spPr"][0]["a:xfrm"][0]["a:off"][0]["$"];
-			let elementPresetType = this.element["p:spPr"][0]["a:prstGeom"][0]["$"]["prst"];
+			let elementPresetType = CheckValidObject(this.element, '["p:spPr"][0]["a:prstGeom"][0]["$"]["prst"]') || "none";
 			let elementOffsetPosition = this.element["p:spPr"][0]["a:xfrm"][0]["a:ext"][0]["$"];
 
 			let paragraphInfo = CheckValidObject(this.element, '["p:txBody"][0]["a:p"][0]');
