@@ -1,12 +1,8 @@
-# Project Overview
+Wouldn't it be great if we could use a slideshow canvas as WSIWYG editor to rapidly design and ship UIs or start coding?
 
-Wouldn't it be great if we could use a slideshow canvas as WSIWYG editor rapidly design and ship UIs?
+This project was built from the ground up to utilize the design elements of PPT presentations and reuse them anywhere. It is built with modularity, extensibility and flexibility in mind whilst abstracting the complexity. It's **not** a direct PPTX -> HTML converter; more like PPTX -> JSON -> HTML instead.
 
-The airppt project was designed to utilize the design elements of powerpoint presentations and make them usable in different applications.
-
-This project was built from the ground up with the consumer in mind. It is built with modularity, extensibility and flexibility in mind. It's **not** a direct PPT -> HTML converter.
-
-I'd love you for you to contribute. Please read the guidelines. I'm also happy to walk you through making your first PR. Set a time that works for you here.
+I'd love you for you to contribute. New to open source? This is an easy start. I'm happy to walkthrough how to close your first issue. Pick a [time](https://goo.gl/forms/7NjFEYayLOuYdr2q1) that works best for you.
 
 # airppt-parser
 
