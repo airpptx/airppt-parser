@@ -1,4 +1,4 @@
-import { CheckValidObject as checkPath, CheckValidObject } from "../helpers/checkobj";
+import { CheckValidObject } from "../helpers/checkobj";
 import ColorParser from "./colorparser";
 
 import { PowerpointElement, TextAlignment, FontAttributes } from "airppt-models/pptelement";
@@ -13,8 +13,8 @@ export default class ParagraphParser {
 		}
 
 		let pptTextElement: PowerpointElement["paragraph"] = {
-			text: textElement["a:r"][0]["a:t"].toString() || "",
-			textCharacterProperties: this.determineTextProperties(checkPath(textElement, '["a:r"][0]["a:rPr"][0]')),
+			text: this.ConcatenateParagraphLines(textElement["a:r"]) || "",
+			textCharacterProperties: this.determineTextProperties(CheckValidObject(textElement, '["a:r"][0]["a:rPr"][0]')),
 			paragraphProperties: this.determineParagraphProperties(textElement)
 		};
 		return pptTextElement;
@@ -27,9 +27,9 @@ export default class ParagraphParser {
 		}
 
 		let textPropertiesElement: PowerpointElement["paragraph"]["textCharacterProperties"] = {
-			size: checkPath(textProperties, '["$"].sz') || 1200,
+			size: CheckValidObject(textProperties, '["$"].sz') || 1200,
 			fontAttributes: this.determineFontAttributes(textProperties["$"]),
-			font: checkPath(textProperties, '["a:latin"][0]["$"]["typeface"]') || "Helvetica",
+			font: CheckValidObject(textProperties, '["a:latin"][0]["$"]["typeface"]') || "Helvetica",
 			fillColor: ColorParser.getTextColors(textProperties) || "000000"
 		};
 
@@ -44,7 +44,7 @@ export default class ParagraphParser {
 
 		let alignment: TextAlignment = TextAlignment.Left;
 
-		let alignProps = checkPath(paragraphProperties, '["a:pPr"][0]["$"]["algn"]');
+		let alignProps = CheckValidObject(paragraphProperties, '["a:pPr"][0]["$"]["algn"]');
 
 		if (alignProps) {
 			switch (alignProps) {
@@ -92,5 +92,19 @@ export default class ParagraphParser {
 			}
 		});
 		return attributesArray;
+	}
+
+	/*["a:r"]*/
+	private static ConcatenateParagraphLines(lines: any[]) {
+		if (!lines) {
+			return null;
+		}
+
+		let text = [];
+		for (var i in lines) {
+			text.push(lines[i]["a:t"]);
+		}
+
+		return text.join(" ");
 	}
 }

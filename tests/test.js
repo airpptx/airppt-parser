@@ -8,6 +8,6 @@ let pptParser = new AirParser("./sample.pptx");
 waitForParsing();
 
 async function waitForParsing() {
-	let result = await pptParser.ParsePowerPoint(1);
-	console.log(result);
+	let result = await pptParser.ParsePowerPoint(8);
+	console.log(JSON.stringify(result));
 }
