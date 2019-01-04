@@ -14,10 +14,6 @@ export default class ShapeParser {
 	}
 
 	public static determineSpecialityType(element): SpecialityType {
-		if (checkPath(element, '["p:nvSpPr"][0]["p:cNvSpPr"][0]["$"]["txBox"]') == 1) {
-			return SpecialityType.Textbox;
-		}
-
 		if (element["p:nvPicPr"]) {
 			return SpecialityType.Image;
 		}
