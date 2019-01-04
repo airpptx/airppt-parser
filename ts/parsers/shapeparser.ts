@@ -9,24 +9,8 @@ import { PowerpointElement, ElementType, SpecialityType } from "airppt-models/pp
  */
 export default class ShapeParser {
 	public static determineShapeType(prst): ElementType {
-		switch (prst) {
-			case "rect":
-				return ElementType.Rectangle;
-			case "ellipse":
-				return ElementType.Ellipse;
-			case "triangle":
-				return ElementType.Triangle;
-			case "roundRect":
-			//return ElementType.RoundedRectangle;
-			case "rtTriangle":
-			//return ElementType.RightTriangle;
-			case "octagon":
-			//return ElementType.Octagon;
-			case "frame":
-			//return ElementType.Frame;
-			default:
-				return ElementType.Rectangle;
-		}
+		//return the preset ppt shape type
+		return prst;
 	}
 
 	public static determineSpecialityType(element): SpecialityType {
