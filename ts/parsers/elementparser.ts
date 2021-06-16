@@ -1,5 +1,4 @@
 import { CheckValidObject } from "../helpers/checkobj";
-import ColorParser from "./colorparser";
 import ShapeParser from "./shapeparser";
 import ParagraphParser from "./paragraphparser";
 import SlideRelationsParser from "./relparser";
@@ -11,10 +10,6 @@ import { PowerpointElement } from "airppt-models/pptelement";
  */
 class PowerpointElementParser {
 	private element;
-
-	constructor(private slideShowGlobals, private slideShowTheme) {
-		ColorParser.setSlideShowTheme(slideShowTheme);
-	}
 
 	public getProcessedElement(rawElement, slideRelationships): PowerpointElement {
 		SlideRelationsParser.setSlideRelations(slideRelationships);

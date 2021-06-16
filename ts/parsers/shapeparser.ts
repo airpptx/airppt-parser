@@ -2,13 +2,13 @@ import { CheckValidObject as checkPath } from "../helpers/checkobj";
 import ColorParser from "./colorparser";
 import LineParser from "./lineparser";
 
-import { PowerpointElement, ElementType, SpecialityType } from "airppt-models/pptelement";
+import { PowerpointElement, SpecialityType } from "airppt-models/pptelement";
 
 /**
  * Parse the shape types and etc.
  */
 export default class ShapeParser {
-	public static determineShapeType(prst): ElementType {
+	public static determineShapeType(prst): any {
 		//return the preset ppt shape type
 		return prst;
 	}

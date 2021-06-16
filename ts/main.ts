@@ -12,15 +12,13 @@ export class AirParser {
 		//open Powerpoint File
 		await ZipHandler.loadZip(this.PowerpointFilePath);
 		let slideShowGlobals = await ZipHandler.parseSlideAttributes("ppt/presentation.xml");
-		let slideShowTheme = await ZipHandler.parseSlideAttributes("ppt/theme/theme1.xml");
-		let pptElementParser = new PowerpointElementParser(slideShowGlobals, slideShowTheme);
+		let pptElementParser = new PowerpointElementParser();
 
 		//only get slideAttributes for one slide and return as array
 		let parsedSlideElements = await this.getSlideElements(pptElementParser, slideNumber);
 
 		let pptDetails: PowerpointDetails = {
 			slideShowGlobals,
-			slideShowTheme,
 			powerPointElements: parsedSlideElements,
 			inputPath: this.PowerpointFilePath
 		};
