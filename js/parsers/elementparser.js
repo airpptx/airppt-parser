@@ -1,49 +1,43 @@
-import { CheckValidObject } from "../helpers/checkobj";
-import ShapeParser from "./shapeparser";
-import ParagraphParser from "./paragraphparser";
-import SlideRelationsParser from "./relparser";
-import { PowerpointElement } from "airppt-models/pptelement";
-import GraphicFrameParser from "./graphicFrameParser";
-import { cleanupJson } from "../utils/common";
-import * as isEmpty from "lodash.isempty";
-
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const checkobj_1 = require("../helpers/checkobj");
+const shapeparser_1 = require("./shapeparser");
+const paragraphparser_1 = require("./paragraphparser");
+const relparser_1 = require("./relparser");
+const graphicFrameParser_1 = require("./graphicFrameParser");
+const common_1 = require("../utils/common");
+const isEmpty = require("lodash.isempty");
 /**
  * Entry point for all Parsers
  */
 class PowerpointElementParser {
-    private element;
-
-    public getProcessedElement(rawElement, slideRelationships): PowerpointElement {
-        SlideRelationsParser.setSlideRelations(slideRelationships);
+    getProcessedElement(rawElement, slideRelationships) {
+        relparser_1.default.setSlideRelations(slideRelationships);
         try {
             if (!rawElement) {
                 return null;
             }
             this.element = rawElement;
-
             let elementName = "";
             let elementPosition;
             let elementOffsetPosition;
             let table = null;
-
             if (this.element["p:nvSpPr"]) {
                 elementName =
                     this.element["p:nvSpPr"][0]["p:cNvPr"][0]["$"]["title"] ||
-                    this.element["p:nvSpPr"][0]["p:cNvPr"][0]["$"]["name"].replace(/\s/g, "");
-
+                        this.element["p:nvSpPr"][0]["p:cNvPr"][0]["$"]["name"].replace(/\s/g, "");
                 //elements must have a position, or else ignore them. TO-DO: Allow Placeholder positions
                 if (!this.element["p:spPr"][0]["a:xfrm"]) {
                     return null;
                 }
                 elementPosition = this.element["p:spPr"][0]["a:xfrm"][0]["a:off"][0]["$"];
                 elementOffsetPosition = this.element["p:spPr"][0]["a:xfrm"][0]["a:ext"][0]["$"];
-            } else if (this.element["p:nvPicPr"]) {
+            }
+            else if (this.element["p:nvPicPr"]) {
                 //if the element is an image, get basic info like this
                 elementName =
                     this.element["p:nvPicPr"][0]["p:cNvPr"][0]["$"]["title"] ||
-                    this.element["p:nvPicPr"][0]["p:cNvPr"][0]["$"]["name"].replace(/\s/g, "");
-
+                        this.element["p:nvPicPr"][0]["p:cNvPr"][0]["$"]["name"].replace(/\s/g, "");
                 if (!this.element["p:spPr"][0]["a:xfrm"]) {
                     return null;
                 }
@@ -52,28 +46,23 @@ class PowerpointElementParser {
             }
             //check only if its the table, in future can be changed it to overall graphic types e.g. diagrams, charts.
             //but for now only doing the tables.
-            else if (CheckValidObject(this.element, '["a:graphic"][0]["a:graphicData"][0]["a:tbl"]')) {
+            else if (checkobj_1.CheckValidObject(this.element, '["a:graphic"][0]["a:graphicData"][0]["a:tbl"]')) {
                 elementName =
                     this.element["p:nvGraphicFramePr"][0]["p:cNvPr"][0]["$"]["title"] ||
-                    this.element["p:nvGraphicFramePr"][0]["p:cNvPr"][0]["$"]["name"].replace(/\s/g, "");
-
+                        this.element["p:nvGraphicFramePr"][0]["p:cNvPr"][0]["$"]["name"].replace(/\s/g, "");
                 if (!this.element["p:xfrm"]) {
                     return null;
                 }
                 elementPosition = this.element["p:xfrm"][0]["a:off"][0]["$"];
                 elementOffsetPosition = this.element["p:xfrm"][0]["a:ext"][0]["$"];
-
-                table = GraphicFrameParser.extractTableElements(this.element);
+                table = graphicFrameParser_1.default.extractTableElements(this.element);
             }
-
-            const elementPresetType = CheckValidObject(this.element, '["p:spPr"][0]["a:prstGeom"][0]["$"]["prst"]') || "none";
-
-            const paragraphInfo = CheckValidObject(this.element, '["p:txBody"][0]["a:p"][0]');
-
-            let pptElement: PowerpointElement = {
+            const elementPresetType = checkobj_1.CheckValidObject(this.element, '["p:spPr"][0]["a:prstGeom"][0]["$"]["prst"]') || "none";
+            const paragraphInfo = checkobj_1.CheckValidObject(this.element, '["p:txBody"][0]["a:p"][0]');
+            let pptElement = {
                 name: elementName,
-                shapeType: ShapeParser.determineShapeType(elementPresetType),
-                specialityType: ShapeParser.determineSpecialityType(this.element),
+                shapeType: shapeparser_1.default.determineShapeType(elementPresetType),
+                specialityType: shapeparser_1.default.determineSpecialityType(this.element),
                 elementPosition: {
                     x: elementPosition.x,
                     y: elementPosition.y
@@ -83,21 +72,19 @@ class PowerpointElementParser {
                     cy: elementOffsetPosition.cy
                 },
                 table: !isEmpty(table) && !isEmpty(table.rows) ? table : null,
-                paragraph: ParagraphParser.extractParagraphElements(paragraphInfo),
-                shape: ShapeParser.extractShapeElements(this.element),
-                links: SlideRelationsParser.resolveShapeHyperlinks(this.element),
+                paragraph: paragraphparser_1.default.extractParagraphElements(paragraphInfo),
+                shape: shapeparser_1.default.extractShapeElements(this.element),
+                links: relparser_1.default.resolveShapeHyperlinks(this.element),
                 raw: rawElement
             };
-
             //TODO: remove the raw property from final JSON
-            pptElement = cleanupJson(pptElement);
-
+            pptElement = common_1.cleanupJson(pptElement);
             return pptElement;
-        } catch (e) {
+        }
+        catch (e) {
             console.warn("ERR could not parse element:", e);
             return null; //skip the element
         }
     }
 }
-
-export default PowerpointElementParser;
+exports.default = PowerpointElementParser;

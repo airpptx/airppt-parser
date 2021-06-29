@@ -1,6 +1,6 @@
 {
 	"name": "airppt-parser",
-	"version": "1.0.9",
+	"version": "1.0.10",
 	"description": "Parses Powerpoint (PPTX) to Standardized JSON Objects",
 	"main": "js/main.js",
 	"types": "js/main.d.ts",
@@ -26,8 +26,9 @@
 	"license": "MIT",
 	"dependencies": {
 		"@types/node": "^15.12.2",
-		"airppt-models": "https://github.com/easygenerator/airppt-models/tree/dev",
+		"airppt-models": "https://github.com/rabi92/airppt-models/tree/dev",
 		"jszip": "^3.1.5",
+		"lodash.isempty": "^4.4.0",
 		"module-alias": "^2.1.0",
 		"string-template": "^1.0.0",
 		"xml2js-es6-promise": "^1.1.1"
