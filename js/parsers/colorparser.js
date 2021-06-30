@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const checkobj_1 = require("../helpers/checkobj");
 const relparser_1 = require("./relparser");
-const pptelement_1 = require("airppt-models/pptelement");
+const pptelement_1 = require("airppt-models-plus/pptelement");
 const isEmpty = require("lodash.isempty");
 /**
  * Parse the color of elements

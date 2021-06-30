@@ -1,4 +1,4 @@
-import { PowerpointElement } from "airppt-models/pptelement";
+import { PowerpointElement } from "airppt-models-plus/pptelement";
 /**
  * Entry point for all Parsers
  */

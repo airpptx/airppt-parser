@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const checkobj_1 = require("../helpers/checkobj");
-const pptelement_1 = require("airppt-models/pptelement");
+const pptelement_1 = require("airppt-models-plus/pptelement");
 /**
  * Parse everything that deals with relations such as hyperlinks and local images
  */

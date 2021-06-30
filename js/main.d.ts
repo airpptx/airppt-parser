@@ -1,4 +1,4 @@
-import { PowerpointDetails } from "airppt-models/pptdetails";
+import { PowerpointDetails } from "airppt-models-plus/pptdetails";
 export declare class AirParser {
     private PowerpointFilePath;
     constructor(PowerpointFilePath: string);

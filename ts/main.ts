@@ -3,7 +3,7 @@ import ZipHandler from "./helpers/ziphandler";
 import { getAttributeByPath } from "./helpers/attributesHandler";
 import PowerpointElementParser from "./parsers/elementparser";
 import GraphicFrameParser from "./parsers/graphicFrameParser";
-import { PowerpointDetails } from "airppt-models/pptdetails";
+import { PowerpointDetails } from "airppt-models-plus/pptdetails";
 import * as format from "string-template";
 
 export class AirParser {

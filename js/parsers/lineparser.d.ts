@@ -1,4 +1,4 @@
-import { PowerpointElement, BorderType } from "airppt-models/pptelement";
+import { PowerpointElement, BorderType } from "airppt-models-plus/pptelement";
 /**
  * Parses XML that deals with lines for shapes
  */

@@ -1,6 +1,6 @@
-import { CheckValidObject as checkPath, CheckValidObject } from "../helpers/checkobj";
+import { CheckValidObject as checkPath } from "../helpers/checkobj";
 import RelationParser from "./relparser";
-import { PowerpointElement, FillType } from "airppt-models/pptelement";
+import { PowerpointElement, FillType } from "airppt-models-plus/pptelement";
 import * as isEmpty from "lodash.isempty";
 /**
  * Parse the color of elements

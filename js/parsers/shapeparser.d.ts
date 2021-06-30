@@ -1,4 +1,4 @@
-import { PowerpointElement, SpecialityType } from "airppt-models/pptelement";
+import { PowerpointElement, SpecialityType } from "airppt-models-plus/pptelement";
 /**
  * Parse the shape types and etc.
  */

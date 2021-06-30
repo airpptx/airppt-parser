@@ -87,4 +87,4 @@ export interface PowerpointElement {
 }
 ```
 
-There's are also a number of enums as well. See the entire [interface](https://github.com/airpptx/airppt-models/blob/master/pptelement.d.ts) here.
+There's are also a number of enums as well. See the entire [interface](https://github.com/rabi92/airppt-models/blob/master/pptelement.d.ts) here.

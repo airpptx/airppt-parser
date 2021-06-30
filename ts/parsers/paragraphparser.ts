@@ -1,7 +1,13 @@
 import { CheckValidObject } from "../helpers/checkobj";
 import ColorParser from "./colorparser";
 
-import { PowerpointElement, TextAlignment, FontAttributes, Paragraph, Content } from "airppt-models/pptelement";
+import { 
+    PowerpointElement,
+    TextAlignment,
+    FontAttributes,
+    Paragraph,
+    Content
+} from "airppt-models-plus/pptelement";
 
 /**
  * Parse the paragraph elements

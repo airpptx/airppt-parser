@@ -1,4 +1,4 @@
-import { PowerpointElement, FontAttributes, Paragraph, Content } from "airppt-models/pptelement";
+import { PowerpointElement, FontAttributes, Paragraph, Content } from "airppt-models-plus/pptelement";
 /**
  * Parse the paragraph elements
  */

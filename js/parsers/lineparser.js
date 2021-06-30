@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const checkobj_1 = require("../helpers/checkobj");
 const colorparser_1 = require("./colorparser");
-const pptelement_1 = require("airppt-models/pptelement");
+const pptelement_1 = require("airppt-models-plus/pptelement");
 /**
  * Parses XML that deals with lines for shapes
  */

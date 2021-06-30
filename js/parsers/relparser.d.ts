@@ -1,4 +1,4 @@
-import { PowerpointElement } from "airppt-models/pptelement";
+import { PowerpointElement } from "airppt-models-plus/pptelement";
 /**
  * Parse everything that deals with relations such as hyperlinks and local images
  */
