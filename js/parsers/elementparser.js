@@ -22,16 +22,22 @@ class PowerpointElementParser {
             let elementPosition;
             let elementOffsetPosition;
             let table = null;
+            let isTitle = false;
             if (this.element["p:nvSpPr"]) {
                 elementName =
                     this.element["p:nvSpPr"][0]["p:cNvPr"][0]["$"]["title"] ||
                         this.element["p:nvSpPr"][0]["p:cNvPr"][0]["$"]["name"].replace(/\s/g, "");
+                if (checkobj_1.CheckValidObject(this.element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle") {
+                    isTitle = true;
+                }
                 //elements must have a position, or else ignore them. TO-DO: Allow Placeholder positions
-                if (!this.element["p:spPr"][0]["a:xfrm"]) {
+                if (!isTitle && !this.element["p:spPr"][0]["a:xfrm"]) {
                     return null;
                 }
-                elementPosition = this.element["p:spPr"][0]["a:xfrm"][0]["a:off"][0]["$"];
-                elementOffsetPosition = this.element["p:spPr"][0]["a:xfrm"][0]["a:ext"][0]["$"];
+                if (!isTitle) {
+                    elementPosition = this.element["p:spPr"][0]["a:xfrm"][0]["a:off"][0]["$"];
+                    elementOffsetPosition = this.element["p:spPr"][0]["a:xfrm"][0]["a:ext"][0]["$"];
+                }
             }
             else if (this.element["p:nvPicPr"]) {
                 //if the element is an image, get basic info like this
@@ -58,18 +64,18 @@ class PowerpointElementParser {
                 table = graphicFrameParser_1.default.extractTableElements(this.element);
             }
             const elementPresetType = checkobj_1.CheckValidObject(this.element, '["p:spPr"][0]["a:prstGeom"][0]["$"]["prst"]') || "none";
-            const paragraphInfo = checkobj_1.CheckValidObject(this.element, '["p:txBody"][0]["a:p"][0]');
+            const paragraphInfo = checkobj_1.CheckValidObject(this.element, '["p:txBody"][0]["a:p"]');
             let pptElement = {
                 name: elementName,
                 shapeType: shapeparser_1.default.determineShapeType(elementPresetType),
                 specialityType: shapeparser_1.default.determineSpecialityType(this.element),
                 elementPosition: {
-                    x: elementPosition.x,
-                    y: elementPosition.y
+                    x: elementPosition === null || elementPosition === void 0 ? void 0 : elementPosition.x,
+                    y: elementPosition === null || elementPosition === void 0 ? void 0 : elementPosition.y
                 },
                 elementOffsetPosition: {
-                    cx: elementOffsetPosition.cx,
-                    cy: elementOffsetPosition.cy
+                    cx: elementOffsetPosition === null || elementOffsetPosition === void 0 ? void 0 : elementOffsetPosition.cx,
+                    cy: elementOffsetPosition === null || elementOffsetPosition === void 0 ? void 0 : elementOffsetPosition.cy
                 },
                 table: !isEmpty(table) && !isEmpty(table.rows) ? table : null,
                 paragraph: paragraphparser_1.default.extractParagraphElements(paragraphInfo),

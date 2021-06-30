@@ -1,14 +1,13 @@
-import { PowerpointElement, FontAttributes } from "airppt-models/pptelement";
+import { PowerpointElement, FontAttributes, Paragraph, Content } from "airppt-models/pptelement";
 /**
  * Parse the paragraph elements
  */
 export default class ParagraphParser {
-    static extractParagraphElements(textElement: any): PowerpointElement["paragraph"];
+    static extractParagraphElements(paragraphs: any[]): PowerpointElement["paragraph"];
     /**a:rPr */
-    static determineTextProperties(textProperties: any): PowerpointElement["paragraph"]["textCharacterProperties"];
-    /**a:pPr */
-    static determineParagraphProperties(paragraphProperties: any): PowerpointElement["paragraph"]["paragraphProperties"];
-    /** Parse for italics, bold, underline */
+    static determineTextProperties(textProperties: any): Content["textCharacterProperties"];
+    /** Parse for italics, bold, underline & strike through*/
     static determineFontAttributes(attributesList: any): FontAttributes[];
-    private static ConcatenateParagraphLines;
+    /**a:pPr */
+    static determineParagraphProperties(paragraphProperties: any): Paragraph["paragraphProperties"];
 }

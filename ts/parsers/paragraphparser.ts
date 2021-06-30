@@ -1,32 +1,40 @@
 import { CheckValidObject } from "../helpers/checkobj";
 import ColorParser from "./colorparser";
 
-import { PowerpointElement, TextAlignment, FontAttributes } from "airppt-models/pptelement";
+import { PowerpointElement, TextAlignment, FontAttributes, Paragraph, Content } from "airppt-models/pptelement";
 
 /**
  * Parse the paragraph elements
  */
 export default class ParagraphParser {
-    public static extractParagraphElements(textElement): PowerpointElement["paragraph"] {
-        if (!textElement || !textElement["a:r"]) {
+    public static extractParagraphElements(paragraphs: any[]): PowerpointElement["paragraph"] {
+        if (!paragraphs || paragraphs.length === 0) {
             return null;
         }
 
-        let pptTextElement: PowerpointElement["paragraph"] = {
-            text: this.ConcatenateParagraphLines(textElement["a:r"]) || "",
-            textCharacterProperties: this.determineTextProperties(CheckValidObject(textElement, '["a:r"][0]["a:rPr"][0]')),
-            paragraphProperties: this.determineParagraphProperties(textElement)
-        };
-        return pptTextElement;
+        return paragraphs.map((paragraph) => {
+            const textElements = paragraph["a:r"] || [];
+            const content = textElements.map((txtElement) => {
+                return {
+                    text: txtElement["a:t"] || "",
+                    textCharacterProperties: this.determineTextProperties(CheckValidObject(txtElement, '["a:rPr"][0]'))
+                };
+            });
+
+            return {
+                content: content,
+                paragraphProperties: this.determineParagraphProperties(paragraph)
+            };
+        });
     }
 
     /**a:rPr */
-    public static determineTextProperties(textProperties): PowerpointElement["paragraph"]["textCharacterProperties"] {
+    public static determineTextProperties(textProperties): Content["textCharacterProperties"] {
         if (!textProperties) {
             return null;
         }
 
-        let textPropertiesElement: PowerpointElement["paragraph"]["textCharacterProperties"] = {
+        const textPropertiesElement: Content["textCharacterProperties"] = {
             size: CheckValidObject(textProperties, '["$"].sz') || 1200,
             fontAttributes: this.determineFontAttributes(textProperties["$"]),
             font: CheckValidObject(textProperties, '["a:latin"][0]["$"]["typeface"]') || "Helvetica",
@@ -36,15 +44,38 @@ export default class ParagraphParser {
         return textPropertiesElement;
     }
 
+    /** Parse for italics, bold, underline & strike through*/
+    public static determineFontAttributes(attributesList): FontAttributes[] {
+        const attributesArray: FontAttributes[] = [];
+        if (!attributesList) {
+            return null;
+        }
+        Object.keys(attributesList).forEach((element) => {
+            if (element === FontAttributes.Bold && attributesList[element] == 1) {
+                attributesArray.push(FontAttributes.Bold);
+            }
+            if (element === FontAttributes.Italics && attributesList[element] == 1) {
+                attributesArray.push(FontAttributes.Italics);
+            }
+            if (element === FontAttributes.Underline && attributesList[element] != "none") {
+                attributesArray.push(FontAttributes.Underline);
+            }
+            if (element === FontAttributes.StrikeThrough && attributesList[element] != "noStrike") {
+                attributesArray.push(FontAttributes.StrikeThrough);
+            }
+        });
+        return attributesArray;
+    }
+
     /**a:pPr */
-    public static determineParagraphProperties(paragraphProperties): PowerpointElement["paragraph"]["paragraphProperties"] {
+    public static determineParagraphProperties(paragraphProperties): Paragraph["paragraphProperties"] {
         if (!paragraphProperties) {
             return null;
         }
 
         let alignment: TextAlignment = TextAlignment.Left;
 
-        let alignProps = CheckValidObject(paragraphProperties, '["a:pPr"][0]["$"]["algn"]');
+        const alignProps = CheckValidObject(paragraphProperties, '["a:pPr"][0]["$"]["algn"]');
 
         if (alignProps) {
             switch (alignProps) {
@@ -62,49 +93,10 @@ export default class ParagraphParser {
                     break;
             }
         }
-
-        console.log("align", alignment);
-        let paragraphPropertiesElement: PowerpointElement["paragraph"]["paragraphProperties"] = {
+        const paragraphPropertiesElement: Paragraph["paragraphProperties"] = {
             alignment
         };
 
         return paragraphPropertiesElement;
-    }
-
-    /** Parse for italics, bold, underline */
-    public static determineFontAttributes(attributesList): FontAttributes[] {
-        let attributesArray: FontAttributes[] = [];
-        if (!attributesList) {
-            return null;
-        }
-        Object.keys(attributesList).forEach((element) => {
-            if (element == "b" && attributesList[element] == 1) {
-                attributesArray.push(FontAttributes.Bold);
-            }
-            if (element == "i" && attributesList[element] == 1) {
-                attributesArray.push(FontAttributes.Italics);
-            }
-            if (element == "u" && attributesList[element] == 1) {
-                attributesArray.push(FontAttributes.Underline);
-            }
-            if (element == "s" && attributesList[element] == 1) {
-                attributesArray.push(FontAttributes.StrikeThrough);
-            }
-        });
-        return attributesArray;
-    }
-
-    /*["a:r"]*/
-    private static ConcatenateParagraphLines(lines: any[]) {
-        if (!lines) {
-            return null;
-        }
-
-        let text = [];
-        for (var i in lines) {
-            text.push(lines[i]["a:t"]);
-        }
-
-        return text.join(" ");
     }
 }

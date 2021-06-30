@@ -7,7 +7,6 @@ import GraphicFrameParser from "./graphicFrameParser";
 import { cleanupJson } from "../utils/common";
 import * as isEmpty from "lodash.isempty";
 
-
 /**
  * Entry point for all Parsers
  */
@@ -26,18 +25,26 @@ class PowerpointElementParser {
             let elementPosition;
             let elementOffsetPosition;
             let table = null;
+            let isTitle = false;
 
             if (this.element["p:nvSpPr"]) {
                 elementName =
                     this.element["p:nvSpPr"][0]["p:cNvPr"][0]["$"]["title"] ||
                     this.element["p:nvSpPr"][0]["p:cNvPr"][0]["$"]["name"].replace(/\s/g, "");
 
+                if (CheckValidObject(this.element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle") {
+                    isTitle = true;
+                }
+
                 //elements must have a position, or else ignore them. TO-DO: Allow Placeholder positions
-                if (!this.element["p:spPr"][0]["a:xfrm"]) {
+                if (!isTitle && !this.element["p:spPr"][0]["a:xfrm"]) {
                     return null;
                 }
-                elementPosition = this.element["p:spPr"][0]["a:xfrm"][0]["a:off"][0]["$"];
-                elementOffsetPosition = this.element["p:spPr"][0]["a:xfrm"][0]["a:ext"][0]["$"];
+
+                if (!isTitle) {
+                    elementPosition = this.element["p:spPr"][0]["a:xfrm"][0]["a:off"][0]["$"];
+                    elementOffsetPosition = this.element["p:spPr"][0]["a:xfrm"][0]["a:ext"][0]["$"];
+                }
             } else if (this.element["p:nvPicPr"]) {
                 //if the element is an image, get basic info like this
                 elementName =
@@ -68,19 +75,19 @@ class PowerpointElementParser {
 
             const elementPresetType = CheckValidObject(this.element, '["p:spPr"][0]["a:prstGeom"][0]["$"]["prst"]') || "none";
 
-            const paragraphInfo = CheckValidObject(this.element, '["p:txBody"][0]["a:p"][0]');
+            const paragraphInfo = CheckValidObject(this.element, '["p:txBody"][0]["a:p"]');
 
             let pptElement: PowerpointElement = {
                 name: elementName,
                 shapeType: ShapeParser.determineShapeType(elementPresetType),
                 specialityType: ShapeParser.determineSpecialityType(this.element),
                 elementPosition: {
-                    x: elementPosition.x,
-                    y: elementPosition.y
+                    x: elementPosition?.x,
+                    y: elementPosition?.y
                 },
                 elementOffsetPosition: {
-                    cx: elementOffsetPosition.cx,
-                    cy: elementOffsetPosition.cy
+                    cx: elementOffsetPosition?.cx,
+                    cy: elementOffsetPosition?.cy
                 },
                 table: !isEmpty(table) && !isEmpty(table.rows) ? table : null,
                 paragraph: ParagraphParser.extractParagraphElements(paragraphInfo),

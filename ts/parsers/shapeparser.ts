@@ -21,6 +21,10 @@ export default class ShapeParser {
             return SpecialityType.Table;
         }
 
+        if (checkPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle") {
+            return SpecialityType.Title;
+        }
+
         return SpecialityType.None;
     }
 

@@ -7,23 +7,30 @@ const pptelement_1 = require("airppt-models/pptelement");
  * Parse the paragraph elements
  */
 class ParagraphParser {
-    static extractParagraphElements(textElement) {
-        if (!textElement || !textElement["a:r"]) {
+    static extractParagraphElements(paragraphs) {
+        if (!paragraphs || paragraphs.length === 0) {
             return null;
         }
-        let pptTextElement = {
-            text: this.ConcatenateParagraphLines(textElement["a:r"]) || "",
-            textCharacterProperties: this.determineTextProperties(checkobj_1.CheckValidObject(textElement, '["a:r"][0]["a:rPr"][0]')),
-            paragraphProperties: this.determineParagraphProperties(textElement)
-        };
-        return pptTextElement;
+        return paragraphs.map((paragraph) => {
+            const textElements = paragraph["a:r"] || [];
+            const content = textElements.map((txtElement) => {
+                return {
+                    text: txtElement["a:t"] || "",
+                    textCharacterProperties: this.determineTextProperties(checkobj_1.CheckValidObject(txtElement, '["a:rPr"][0]'))
+                };
+            });
+            return {
+                content: content,
+                paragraphProperties: this.determineParagraphProperties(paragraph)
+            };
+        });
     }
     /**a:rPr */
     static determineTextProperties(textProperties) {
         if (!textProperties) {
             return null;
         }
-        let textPropertiesElement = {
+        const textPropertiesElement = {
             size: checkobj_1.CheckValidObject(textProperties, '["$"].sz') || 1200,
             fontAttributes: this.determineFontAttributes(textProperties["$"]),
             font: checkobj_1.CheckValidObject(textProperties, '["a:latin"][0]["$"]["typeface"]') || "Helvetica",
@@ -31,13 +38,35 @@ class ParagraphParser {
         };
         return textPropertiesElement;
     }
+    /** Parse for italics, bold, underline & strike through*/
+    static determineFontAttributes(attributesList) {
+        const attributesArray = [];
+        if (!attributesList) {
+            return null;
+        }
+        Object.keys(attributesList).forEach((element) => {
+            if (element === pptelement_1.FontAttributes.Bold && attributesList[element] == 1) {
+                attributesArray.push(pptelement_1.FontAttributes.Bold);
+            }
+            if (element === pptelement_1.FontAttributes.Italics && attributesList[element] == 1) {
+                attributesArray.push(pptelement_1.FontAttributes.Italics);
+            }
+            if (element === pptelement_1.FontAttributes.Underline && attributesList[element] != "none") {
+                attributesArray.push(pptelement_1.FontAttributes.Underline);
+            }
+            if (element === pptelement_1.FontAttributes.StrikeThrough && attributesList[element] != "noStrike") {
+                attributesArray.push(pptelement_1.FontAttributes.StrikeThrough);
+            }
+        });
+        return attributesArray;
+    }
     /**a:pPr */
     static determineParagraphProperties(paragraphProperties) {
         if (!paragraphProperties) {
             return null;
         }
         let alignment = pptelement_1.TextAlignment.Left;
-        let alignProps = checkobj_1.CheckValidObject(paragraphProperties, '["a:pPr"][0]["$"]["algn"]');
+        const alignProps = checkobj_1.CheckValidObject(paragraphProperties, '["a:pPr"][0]["$"]["algn"]');
         if (alignProps) {
             switch (alignProps) {
                 case "ctr":
@@ -54,44 +83,10 @@ class ParagraphParser {
                     break;
             }
         }
-        console.log("align", alignment);
-        let paragraphPropertiesElement = {
+        const paragraphPropertiesElement = {
             alignment
         };
         return paragraphPropertiesElement;
-    }
-    /** Parse for italics, bold, underline */
-    static determineFontAttributes(attributesList) {
-        let attributesArray = [];
-        if (!attributesList) {
-            return null;
-        }
-        Object.keys(attributesList).forEach((element) => {
-            if (element == "b" && attributesList[element] == 1) {
-                attributesArray.push(pptelement_1.FontAttributes.Bold);
-            }
-            if (element == "i" && attributesList[element] == 1) {
-                attributesArray.push(pptelement_1.FontAttributes.Italics);
-            }
-            if (element == "u" && attributesList[element] == 1) {
-                attributesArray.push(pptelement_1.FontAttributes.Underline);
-            }
-            if (element == "s" && attributesList[element] == 1) {
-                attributesArray.push(pptelement_1.FontAttributes.StrikeThrough);
-            }
-        });
-        return attributesArray;
-    }
-    /*["a:r"]*/
-    static ConcatenateParagraphLines(lines) {
-        if (!lines) {
-            return null;
-        }
-        let text = [];
-        for (var i in lines) {
-            text.push(lines[i]["a:t"]);
-        }
-        return text.join(" ");
     }
 }
 exports.default = ParagraphParser;

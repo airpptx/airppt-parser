@@ -19,6 +19,9 @@ class ShapeParser {
         if (checkobj_1.CheckValidObject(element, '["a:graphic"][0]["a:graphicData"][0]["a:tbl"]')) {
             return pptelement_1.SpecialityType.Table;
         }
+        if (checkobj_1.CheckValidObject(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle") {
+            return pptelement_1.SpecialityType.Title;
+        }
         return pptelement_1.SpecialityType.None;
     }
     static extractShapeElements(element) {
