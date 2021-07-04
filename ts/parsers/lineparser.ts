@@ -64,7 +64,7 @@ export default class LineParser {
 
         return (
             checkPath(lineProperties, '["a:solidFill"]["0"]["a:srgbClr"]["0"]["$"]["val"]') ||
-            ColorParser.getThemeColor(checkPath(lineProperties, '["a:solidFill"]["0"]["a:schemeClr"]["0"]["$"]["val"]')) ||
+            // ColorParser.getThemeColor(checkPath(lineProperties, '["a:solidFill"]["0"]["a:schemeClr"]["0"]["$"]["val"]')) ||
             "000000"
         );
     }
