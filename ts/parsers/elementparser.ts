@@ -93,10 +93,9 @@ class PowerpointElementParser {
                 paragraph: ParagraphParser.extractParagraphElements(paragraphInfo),
                 shape: ShapeParser.extractShapeElements(this.element),
                 links: SlideRelationsParser.resolveShapeHyperlinks(this.element),
-                raw: rawElement
+                // raw: rawElement
             };
 
-            //TODO: remove the raw property from final JSON
             pptElement = cleanupJson(pptElement);
 
             return pptElement;
