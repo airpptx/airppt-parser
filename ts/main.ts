@@ -10,7 +10,6 @@ export class AirParser {
 
     public async ParsePowerPoint(): Promise<PowerpointDetails> {
         return new Promise<PowerpointDetails>(async (resolve, reject) => {
-            //open Powerpoint File
             const pptElementParser = new PowerpointElementParser();
             const slidesLength = await PptGlobalsParser.getSlidesLength(this.PowerpointFilePath);
             const allSlides = [];
