@@ -33,9 +33,6 @@ export class AirParser {
                         slidesLength
                     });
                 })
-                .catch((err) => {
-                    console.warn(err);
-                });
         });
     }
 }
