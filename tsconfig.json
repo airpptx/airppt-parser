@@ -6,6 +6,10 @@
 		"moduleResolution": "node",
 		"target": "es6",
 		"baseUrl": "./ts",
+		"lib": [
+			"ES2020.Promise",
+			"dom"
+		],
 		"paths": {
 			"@helpers/*": ["helpers/*"],
 			"@models/*": ["models/*"],

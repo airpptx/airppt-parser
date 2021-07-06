@@ -92,16 +92,15 @@ class PowerpointElementParser {
                 table: !isEmpty(table) && !isEmpty(table.rows) ? table : null,
                 paragraph: ParagraphParser.extractParagraphElements(paragraphInfo),
                 shape: ShapeParser.extractShapeElements(this.element),
-                links: SlideRelationsParser.resolveShapeHyperlinks(this.element),
-                raw: rawElement
+                links: SlideRelationsParser.resolveShapeHyperlinks(this.element)
             };
 
-            //TODO: remove the raw property from final JSON
             pptElement = cleanupJson(pptElement);
 
             return pptElement;
         } catch (e) {
             console.warn("ERR could not parse element:", e);
+
             return null; //skip the element
         }
     }
