@@ -1,8 +1,8 @@
 //require("module-alias/register");
-import PowerpointElementParser from "./parsers/elementparser";
 import { PowerpointDetails } from "airppt-models-plus/pptdetails";
-import SlideParser from "./parsers/slideParser";
+import PowerpointElementParser from "./parsers/elementparser";
 import PptGlobalsParser from "./parsers/pptGlobalsParser";
+import SlideParser from "./parsers/slideParser";
 
 export class AirParser {
     constructor(private readonly PowerpointFilePath: string) {}
