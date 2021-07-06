@@ -4,7 +4,6 @@ import { PowerpointDetails } from "airppt-models-plus/pptdetails";
 import SlideParser from "./parsers/slideParser";
 import PptGlobalsParser from "./parsers/pptGlobalsParser";
 
-
 export class AirParser {
     constructor(private readonly PowerpointFilePath: string) {}
 
@@ -23,7 +22,9 @@ export class AirParser {
                     const pptElements = result.map((slideElements) => {
                         if (slideElements.status === "fulfilled") {
                             return slideElements.value;
-                        } else return [];
+                        }
+
+                        return [];
                     });
 
                     resolve({
@@ -32,6 +33,7 @@ export class AirParser {
                         slidesLength
                     });
                 })
+            ;
         });
     }
 }
