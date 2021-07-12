@@ -15,6 +15,9 @@ export default class ShapeParser {
         if (element["p:nvPicPr"]) {
             return SpecialityType.Image;
         }
+        if (checkPath(element, '["p:txBody"][0]["a:p"]')) {
+            return SpecialityType.Paragraph;
+        }
         if (checkPath(element, '["a:graphic"][0]["a:graphicData"][0]["a:tbl"]')) {
             return SpecialityType.Table;
         }
