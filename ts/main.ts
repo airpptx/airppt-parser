@@ -1,8 +1,6 @@
 //require("module-alias/register");
 import { PowerpointDetails } from "airppt-models-plus/pptdetails";
-import PowerpointElementParser from "./parsers/elementparser";
-import PptGlobalsParser from "./parsers/pptGlobalsParser";
-import SlideParser from "./parsers/slideParser";
+import { PowerpointElementParser, PptGlobalsParser, SlideParser } from "./parsers";
 
 export class AirParser {
     constructor(private readonly PowerpointFilePath: string) {}
@@ -13,27 +11,25 @@ export class AirParser {
             const slidesLength = await PptGlobalsParser.getSlidesLength(this.PowerpointFilePath);
             const allSlides = [];
 
-            for (let i = 1; i <= slidesLength + 1; i++) {
+            for (let i = 1; i <= slidesLength; i++) {
                 allSlides.push(SlideParser.getSlideElements(pptElementParser, i));
             }
 
-            Promise.allSettled(allSlides)
-                .then((result) => {
-                    const pptElements = result.map((slideElements) => {
-                        if (slideElements.status === "fulfilled") {
-                            return slideElements.value;
-                        }
+            Promise.allSettled(allSlides).then((result) => {
+                const pptElements = result.map((slideElements) => {
+                    if (slideElements.status === "fulfilled") {
+                        return slideElements.value;
+                    }
 
-                        return [];
-                    });
+                    return [];
+                });
 
-                    resolve({
-                        powerPointElements: pptElements,
-                        inputPath: this.PowerpointFilePath,
-                        slidesLength
-                    });
-                })
-            ;
+                resolve({
+                    powerPointElements: pptElements,
+                    inputPath: this.PowerpointFilePath,
+                    slidesLength
+                });
+            });
         });
     }
 }

@@ -1,9 +1,11 @@
-import { CheckValidObject } from "../helpers/checkobj";
-import ShapeParser from "./shapeparser";
-import ParagraphParser from "./paragraphparser";
-import SlideRelationsParser from "./relparser";
+import { checkPath, getValueAtPath } from "../helpers";
 import { PowerpointElement } from "airppt-models-plus/pptelement";
-import GraphicFrameParser from "./graphicFrameParser";
+import {
+    GraphicFrameParser,
+    ShapeParser,
+    SlideRelationsParser,
+    ParagraphParser
+} from "./";
 import { cleanupJson } from "../utils/common";
 import * as isEmpty from "lodash.isempty";
 
@@ -32,7 +34,7 @@ class PowerpointElementParser {
                     this.element["p:nvSpPr"][0]["p:cNvPr"][0]["$"]["title"] ||
                     this.element["p:nvSpPr"][0]["p:cNvPr"][0]["$"]["name"].replace(/\s/g, "");
 
-                if (CheckValidObject(this.element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle") {
+                if (getValueAtPath(this.element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle") {
                     isTitle = true;
                 }
 
@@ -59,7 +61,7 @@ class PowerpointElementParser {
             }
             //check only if its the table, in future can be changed it to overall graphic types e.g. diagrams, charts.
             //but for now only doing the tables.
-            else if (CheckValidObject(this.element, '["a:graphic"][0]["a:graphicData"][0]["a:tbl"]')) {
+            else if (checkPath(this.element, '["a:graphic"][0]["a:graphicData"][0]["a:tbl"]')) {
                 elementName =
                     this.element["p:nvGraphicFramePr"][0]["p:cNvPr"][0]["$"]["title"] ||
                     this.element["p:nvGraphicFramePr"][0]["p:cNvPr"][0]["$"]["name"].replace(/\s/g, "");
@@ -73,9 +75,9 @@ class PowerpointElementParser {
                 table = GraphicFrameParser.extractTableElements(this.element);
             }
 
-            const elementPresetType = CheckValidObject(this.element, '["p:spPr"][0]["a:prstGeom"][0]["$"]["prst"]') || "none";
+            const elementPresetType = getValueAtPath(this.element, '["p:spPr"][0]["a:prstGeom"][0]["$"]["prst"]') || "none";
 
-            const paragraphInfo = CheckValidObject(this.element, '["p:txBody"][0]["a:p"]');
+            const paragraphInfo = getValueAtPath(this.element, '["p:txBody"][0]["a:p"]');
 
             let pptElement: PowerpointElement = {
                 name: elementName,

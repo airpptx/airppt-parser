@@ -1,6 +1,4 @@
-import { CheckValidObject as checkPath } from "../helpers/checkobj";
-import ColorParser from "./colorparser";
-
+import { getValueAtPath } from "../helpers";
 import { PowerpointElement, BorderType } from "airppt-models-plus/pptelement";
 
 /**
@@ -32,7 +30,7 @@ export default class LineParser {
             return null;
         }
 
-        let dashType = checkPath(lineProperties, '["a:prstDash"][0]["$"]["val"]') || "default";
+        let dashType = getValueAtPath(lineProperties, '["a:prstDash"][0]["$"]["val"]') || "default";
         switch (dashType) {
             case "solid":
                 return BorderType.solid;
@@ -52,7 +50,7 @@ export default class LineParser {
             return null;
         }
 
-        return checkPath(lineProperties, '["$"]["w"]') || 1000;
+        return getValueAtPath(lineProperties, '["$"]["w"]') || 1000;
     }
     public static getLineColor(shapeProperties) {
         let lineProperties = shapeProperties["a:ln"][0];
@@ -63,8 +61,8 @@ export default class LineParser {
         }
 
         return (
-            checkPath(lineProperties, '["a:solidFill"]["0"]["a:srgbClr"]["0"]["$"]["val"]') ||
-            // ColorParser.getThemeColor(checkPath(lineProperties, '["a:solidFill"]["0"]["a:schemeClr"]["0"]["$"]["val"]')) ||
+            getValueAtPath(lineProperties, '["a:solidFill"]["0"]["a:srgbClr"]["0"]["$"]["val"]') ||
+            // ColorParser.getThemeColor(getValueAtPath(lineProperties, '["a:solidFill"]["0"]["a:schemeClr"]["0"]["$"]["val"]')) ||
             "000000"
         );
     }

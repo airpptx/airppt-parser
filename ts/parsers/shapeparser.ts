@@ -1,7 +1,5 @@
-import { CheckValidObject as checkPath } from "../helpers/checkobj";
-import ColorParser from "./colorparser";
-import LineParser from "./lineparser";
-
+import { checkPath, getValueAtPath } from "../helpers";
+import { ColorParser, LineParser } from "./";
 import { PowerpointElement, SpecialityType } from "airppt-models-plus/pptelement";
 
 /**
@@ -21,7 +19,7 @@ export default class ShapeParser {
             return SpecialityType.Table;
         }
 
-        if (checkPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle") {
+        if (getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle") {
             return SpecialityType.Title;
         }
 

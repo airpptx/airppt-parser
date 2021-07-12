@@ -1,6 +1,4 @@
-import { CheckValidObject as checkPath, CheckValidObject } from "../helpers/checkobj";
-import { link } from "fs";
-
+import { getValueAtPath } from "../helpers";
 import { PowerpointElement, LinkType } from "airppt-models-plus/pptelement";
 
 /**
@@ -17,8 +15,8 @@ export default class SlideRelationsParser {
     }
 
     public static resolveShapeHyperlinks(element): PowerpointElement["links"] {
-        let relID = CheckValidObject(element, '["p:nvSpPr"][0]["p:cNvPr"][0]["a:hlinkClick"][0]["$"]["r:id"]');
-        relID = CheckValidObject(element, '["p:blipFill"][0]["a:blip"][0]["$"]["r:embed"]');
+        let relID = getValueAtPath(element, '["p:nvSpPr"][0]["p:cNvPr"][0]["a:hlinkClick"][0]["$"]["r:id"]');
+        relID = getValueAtPath(element, '["p:blipFill"][0]["a:blip"][0]["$"]["r:embed"]');
         if (!relID) {
             return null;
         }

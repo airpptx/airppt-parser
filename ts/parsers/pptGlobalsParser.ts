@@ -1,6 +1,4 @@
-import { getAttributeByPath } from "../helpers/attributesHandler";
-import ZipHandler from "../helpers/ziphandler";
-
+import { getAttributeByPath, ZipHandler} from "../helpers";
 export default class PptGlobalsParser {
     public static async getSlidesLength(pptFilePath: string) {
         //@todo: PROBLEM - Implement error handling

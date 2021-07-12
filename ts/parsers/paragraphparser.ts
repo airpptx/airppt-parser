@@ -1,7 +1,7 @@
-import { CheckValidObject } from "../helpers/checkobj";
-import ColorParser from "./colorparser";
+import { getValueAtPath } from "../helpers";
+import { ColorParser } from "./";
 
-import { 
+import {
     PowerpointElement,
     TextAlignment,
     FontAttributes,
@@ -23,7 +23,7 @@ export default class ParagraphParser {
             const content = textElements.map((txtElement) => {
                 return {
                     text: txtElement["a:t"] || "",
-                    textCharacterProperties: this.determineTextProperties(CheckValidObject(txtElement, '["a:rPr"][0]'))
+                    textCharacterProperties: this.determineTextProperties(getValueAtPath(txtElement, '["a:rPr"][0]'))
                 };
             });
 
@@ -41,9 +41,9 @@ export default class ParagraphParser {
         }
 
         const textPropertiesElement: Content["textCharacterProperties"] = {
-            size: CheckValidObject(textProperties, '["$"].sz') || 1200,
+            size: getValueAtPath(textProperties, '["$"].sz') || 1200,
             fontAttributes: this.determineFontAttributes(textProperties["$"]),
-            font: CheckValidObject(textProperties, '["a:latin"][0]["$"]["typeface"]') || "Helvetica",
+            font: getValueAtPath(textProperties, '["a:latin"][0]["$"]["typeface"]') || "Helvetica",
             fillColor: ColorParser.getTextColors(textProperties) || "000000"
         };
 
@@ -81,7 +81,7 @@ export default class ParagraphParser {
 
         let alignment: TextAlignment = TextAlignment.Left;
 
-        const alignProps = CheckValidObject(paragraphProperties, '["a:pPr"][0]["$"]["algn"]');
+        const alignProps = getValueAtPath(paragraphProperties, '["a:pPr"][0]["$"]["algn"]');
 
         if (alignProps) {
             switch (alignProps) {

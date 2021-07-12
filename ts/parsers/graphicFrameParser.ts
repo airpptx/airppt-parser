@@ -1,6 +1,9 @@
 //Graphic frame node includes tables, charts and diagrams
 
-import { getAttributeByPath } from "../helpers/attributesHandler";
+import { getAttributeByPath, getValueAtPath } from "../helpers";
+import * as isEmpty from "lodash.isempty";
+import { TableDesign } from "airppt-models-plus/pptelement";
+import { ParagraphParser } from "./";
 
 export default class GraphicFrameParser {
     public static processGraphicFrameNodes = (graphicFrames) => {
@@ -24,10 +27,25 @@ export default class GraphicFrameParser {
         return result;
     };
 
+    static getTableDesigns = (table: any[]): string[] => {
+        const allDesigns = getAttributeByPath(table, ["a:tblPr", "$"]);
+        const tableDesigns = [];
+        if (!isEmpty(allDesigns)) {
+            for (const supportedDesign of Object.values(TableDesign)) {
+                if (allDesigns[supportedDesign]) {
+                    tableDesigns.push(supportedDesign);
+                }
+            }
+        }
+
+        return tableDesigns;
+    };
+
     public static extractTableElements = (frame) => {
         const rawTable = getAttributeByPath([frame], ["a:graphic", "a:graphicData", "a:tbl"]);
         const rawRows = rawTable[0]["a:tr"] ? rawTable[0]["a:tr"] : [];
 
+        //TODO: column width mapping to be done here using rawTable[a:tblGrid]
         const tableRows = rawRows.map((row) => {
             let cols = row["a:tc"] ? row["a:tc"] : [];
             cols = cols.filter((col) => {
@@ -50,12 +68,16 @@ export default class GraphicFrameParser {
                     }
                 }
 
-                //TODO: check if the text can have multiple values in an array, by default have seen only one so far
-                // hence getting 0th index
-                const textContent = getAttributeByPath([col], ["a:txBody", "a:p", "a:r", "a:t"])[0] || "";
+                const paragraphInfo = getValueAtPath(col, '["a:txBody"][0]["a:p"]');
+                let parsedParagraph = ParagraphParser.extractParagraphElements(paragraphInfo);
+                //edge case to handle the empty cell, without this check it will be sent as { paragraph: { content: [], ....}}
+                //and that is considered as line break in our renderer
+                if (parsedParagraph.length === 1 && isEmpty(parsedParagraph[0].content)) {
+                    parsedParagraph = [];
+                }
+
                 return {
-                    //raw data doesn't have a property of text if the cell is empty, therefore we return an empty string
-                    text: typeof textContent === "string" ? textContent : "",
+                    paragraph: parsedParagraph,
                     meta
                 };
             });
@@ -65,8 +87,8 @@ export default class GraphicFrameParser {
             };
         });
 
-        //TODO: return any other possible and helpful table info
         return {
+            tableDesign: GraphicFrameParser.getTableDesigns(rawTable),
             rows: tableRows
         };
     };

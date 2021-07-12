@@ -1,8 +1,6 @@
 import * as format from "string-template";
-import ZipHandler from "../helpers/ziphandler";
-import { getAttributeByPath } from "../helpers/attributesHandler";
-import GraphicFrameParser from "../parsers/graphicFrameParser";
-import PowerpointElementParser from "../parsers/elementparser";
+import { getAttributeByPath, ZipHandler } from "../helpers";
+import { GraphicFrameParser, PowerpointElementParser } from "./";
 
 export default class SlideParser {
     public static async getSlideElements(PPTElementParser: PowerpointElementParser, slideNumber): Promise<any[]> {
