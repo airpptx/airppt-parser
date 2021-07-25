@@ -1,4 +1,4 @@
-import { getValueAtPath } from "../helpers";
+import { checkPath, getValueAtPath } from "../helpers";
 import { ColorParser } from "./";
 
 import {
@@ -6,32 +6,175 @@ import {
     TextAlignment,
     FontAttributes,
     Paragraph,
-    Content
+    Content,
+    List,
+    ListType
 } from "airppt-models-plus/pptelement";
 
 /**
  * Parse the paragraph elements
  */
 export default class ParagraphParser {
+    public static isList(paragraph): boolean {
+        return (
+            checkPath(paragraph, '["a:pPr"][0]["a:buAutoNum"]') ||
+            checkPath(paragraph, '["a:pPr"][0]["a:buChar"]')
+        );
+    }
+
+    public static getParagraph(paragraph): Paragraph {
+        const textElements = paragraph["a:r"] || [];
+        const content = textElements.map((txtElement) => {
+            return {
+                text: txtElement["a:t"] || "",
+                textCharacterProperties: this.determineTextProperties(
+                    getValueAtPath(txtElement, '["a:rPr"][0]')
+                )
+            };
+        });
+
+        return {
+            content: content,
+            paragraphProperties: this.determineParagraphProperties(paragraph)
+        };
+    }
+
+    public static getListlevel(paragraph): number {
+        const level = getValueAtPath(paragraph, '["a:pPr"][0]["$"]["lvl"]');
+
+        return level ? parseInt(level) : 0;
+    }
+
+    public static getListType(paragraph): ListType {
+        if (checkPath(paragraph, '["a:pPr"][0]["a:buAutoNum"]')) {
+            return ListType.Ordered;
+        }
+
+        return ListType.UnOrdered;
+    }
+
+    //recursively iterate the list and restructure it to have a parent child relation
+    public static restructureList(list: List): List {
+        //if we keep finding the empty list at top level keep going deeper.
+        //Note: before restructuring, list items and paragraph content didn't exist in the same object
+        if (list.listItems.length === 1 && list.listItems[0].list) {
+            this.restructureList(list.listItems[0].list);
+        }
+        for (let i = 0; i < list.listItems.length - 1; i++) {
+            //if any of the element is list, keep going going deeper into the list
+            if (list.listItems[i].list) {
+                this.restructureList(list.listItems[i].list);
+            }
+            //if the next item to the content is a list, make that list child of the content
+            if (list.listItems[i + 1].list) {
+                list.listItems[i]["list"] = list.listItems[i + 1].list;
+                list.listItems.splice(i + 1, 1);
+                i--;
+            }
+        }
+        return list;
+    }
+
     public static extractParagraphElements(paragraphs: any[]): PowerpointElement["paragraph"] {
         if (!paragraphs || paragraphs.length === 0) {
             return null;
         }
 
-        return paragraphs.map((paragraph) => {
-            const textElements = paragraph["a:r"] || [];
-            const content = textElements.map((txtElement) => {
-                return {
-                    text: txtElement["a:t"] || "",
-                    textCharacterProperties: this.determineTextProperties(getValueAtPath(txtElement, '["a:rPr"][0]'))
-                };
-            });
+        const allParagraphs = [];
+        const stack = [];
+        const paragraph: Paragraph = {
+            list: {
+                listType: ListType.Ordered,
+                listItems: []
+            }
+        };
+        let currentParagraph = paragraph;
+        let currentLevel = -1;
 
-            return {
-                content: content,
-                paragraphProperties: this.determineParagraphProperties(paragraph)
-            };
-        });
+        for (const paragraphItem of paragraphs) {
+            if (this.isList(paragraphItem)) {
+                const listLevel = this.getListlevel(paragraphItem);
+
+                // if its the first of the list kind
+                if (currentLevel === -1) {
+                    while (currentLevel < listLevel - 1) {
+                        const emptyParagraph: Paragraph = {
+                            list: {
+                                listType: ListType.UnOrdered,
+                                listItems: []
+                            }
+                        };
+                        currentParagraph.list.listItems.push(emptyParagraph);
+                        currentParagraph = emptyParagraph;
+                        //pushing it in the stack to keep track of the parents
+                        stack.push(emptyParagraph);
+                        currentLevel++;
+                    }
+                    currentParagraph.list.listType = this.getListType(paragraphItem);
+                    currentParagraph.list.listItems.push(this.getParagraph(paragraphItem));
+                    stack.push(currentParagraph);
+                    currentLevel++;
+                }
+                //if the level is same keep pushing the list items in the same array
+                else if (listLevel === currentLevel) {
+                    currentParagraph.list.listItems.push(this.getParagraph(paragraphItem));
+                } else if (listLevel > currentLevel) {
+                    //edge case to handle if multiple levels are jumped ahead
+                    //create empty paragraphs/lists to maintain hierarchy and fill in the level gaps
+                    while (currentLevel < listLevel - 1) {
+                        const emptyParagraph: Paragraph = {
+                            list: {
+                                listType: ListType.UnOrdered,
+                                listItems: []
+                            }
+                        };
+                        currentParagraph.list.listItems.push(emptyParagraph);
+                        currentParagraph = emptyParagraph;
+                        //pushing it in the stack to keep track of the parents
+                        stack.push(emptyParagraph);
+                        currentLevel++;
+                    }
+                    //if there is another hierarchy starting create a new list for it
+                    const newParagraph: Paragraph = {
+                        list: {
+                            listType: this.getListType(paragraphItem),
+                            listItems: [this.getParagraph(paragraphItem)]
+                        }
+                    };
+                    currentParagraph.list.listItems.push(newParagraph);
+                    currentParagraph = newParagraph;
+                    //pushing it in the stack to keep track of the parents
+                    stack.push(newParagraph);
+                    currentLevel++;
+                } else {
+                    //if we find the list level lower than current level
+                    //keep going back in stack until the same level parent is found
+                    while (currentLevel > listLevel) {
+                        stack.pop();
+                        currentLevel--;
+                    }
+                    //and push the new item as a sibling
+                    currentParagraph = stack[stack.length - 1];
+                    currentParagraph.list.listItems.push(this.getParagraph(paragraphItem));
+                }
+            } else {
+                //if the paragraph was not a list item
+                //check if we previously had the list items then push the list in paragraphs
+                if (paragraph.list.listItems.length > 0) {
+                    paragraph.list = this.restructureList(paragraph.list);
+                    allParagraphs.push(paragraph);
+                    paragraph.list.listItems = [];
+                }
+                allParagraphs.push(this.getParagraph(paragraphItem));
+            }
+        }
+        //true if there were only list items in the text box, push them
+        if (paragraph.list.listItems.length > 0) {
+            paragraph.list = this.restructureList(paragraph.list);
+            allParagraphs.push(paragraph);
+        }
+
+        return allParagraphs;
     }
 
     /**a:rPr */
@@ -74,7 +217,9 @@ export default class ParagraphParser {
     }
 
     /**a:pPr */
-    public static determineParagraphProperties(paragraphProperties): Paragraph["paragraphProperties"] {
+    public static determineParagraphProperties(
+        paragraphProperties
+    ): Paragraph["paragraphProperties"] {
         if (!paragraphProperties) {
             return null;
         }
