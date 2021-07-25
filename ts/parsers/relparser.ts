@@ -1,5 +1,5 @@
 import { getValueAtPath } from "../helpers";
-import { PowerpointElement, LinkType } from "airppt-models-plus/pptelement";
+import { PowerpointElement, LinkType, Content } from "airppt-models-plus/pptelement";
 
 /**
  * Parse everything that deals with relations such as hyperlinks and local images
@@ -15,32 +15,38 @@ export default class SlideRelationsParser {
     }
 
     public static resolveShapeHyperlinks(element): PowerpointElement["links"] {
-        let relID = getValueAtPath(element, '["p:nvSpPr"][0]["p:cNvPr"][0]["a:hlinkClick"][0]["$"]["r:id"]');
-        relID = getValueAtPath(element, '["p:blipFill"][0]["a:blip"][0]["$"]["r:embed"]');
+        const relID = getValueAtPath(element, '["p:blipFill"][0]["a:blip"][0]["$"]["r:embed"]');
         if (!relID) {
             return null;
         }
-        let linkDetails = this.getRelationDetails(relID);
-        return linkDetails;
+        return this.getRelationDetails(relID);
+    }
+
+    public static resolveParagraphHyperlink(element): Content["hyperlink"] {
+        const relID = getValueAtPath(element, '["a:rPr"][0]["a:hlinkClick"][0]["$"]["r:id"]');
+        if (!relID) {
+            return null;
+        }
+
+        return this.getRelationDetails(relID);
     }
 
     public static getRelationDetails(relID): PowerpointElement["links"] {
-        let relations = this.slideRels["Relationships"]["Relationship"];
+        const relations = this.slideRels["Relationships"]["Relationship"];
         for (var relation of relations) {
-            let relationDetails = relation["$"];
+            const relationDetails = relation["$"];
             if (relationDetails["Id"] == relID) {
-                let linkType = LinkType.Asset;
+                let linkType: LinkType;
                 if (relationDetails["TargetMode"] && relationDetails["TargetMode"] === "External") {
                     linkType = LinkType.External;
                 } else {
                     linkType = LinkType.Asset;
                 }
-                let relElement: PowerpointElement["links"] = {
+
+                return {
                     Type: linkType,
                     Uri: relationDetails["Target"].replace("..", "ppt") //update any relative paths
                 };
-
-                return relElement;
             }
         }
 

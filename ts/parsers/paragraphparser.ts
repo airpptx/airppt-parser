@@ -1,5 +1,5 @@
+import { ColorParser, SlideRelationsParser } from "./";
 import { checkPath, getValueAtPath } from "../helpers";
-import { ColorParser } from "./";
 
 import {
     PowerpointElement,
@@ -15,6 +15,31 @@ import {
  * Parse the paragraph elements
  */
 export default class ParagraphParser {
+    //Merge consecutive text content blocks together which have same hyperlinks
+    //and also adjust the spacing in between the hyperlink for the edge cases
+    public static restructureContents(contents: Content[]): Content[] {
+        for (let i = 0; i < contents.length - 1; i++) {
+            if (
+                contents[i].hyperlink &&
+                contents[i + 1].hyperlink &&
+                contents[i].hyperlink.Uri === contents[i + 1].hyperlink.Uri
+            ) {
+                if (
+                    contents[i].text[0].trimEnd().length === contents[i].text[0].length &&
+                    contents[i + 1].text[0].trimStart().length === contents[i + 1].text[0].length
+                ) {
+                    contents[i].text[0] += " " + contents[i + 1].text[0];
+                } else {
+                    contents[i].text[0] += contents[i + 1].text[0];
+                }
+                contents.splice(i + 1, 1);
+                i--;
+            }
+        }
+
+        return contents;
+    }
+
     public static isList(paragraph): boolean {
         return (
             checkPath(paragraph, '["a:pPr"][0]["a:buAutoNum"]') ||
@@ -24,17 +49,26 @@ export default class ParagraphParser {
 
     public static getParagraph(paragraph): Paragraph {
         const textElements = paragraph["a:r"] || [];
-        const content = textElements.map((txtElement) => {
-            return {
+        let contents = textElements.map((txtElement) => {
+            const content: Content = {
                 text: txtElement["a:t"] || "",
                 textCharacterProperties: this.determineTextProperties(
                     getValueAtPath(txtElement, '["a:rPr"][0]')
                 )
             };
+
+            const hyperlink = SlideRelationsParser.resolveParagraphHyperlink(txtElement);
+            if (hyperlink) {
+                content.hyperlink = hyperlink;
+            }
+
+            return content;
         });
 
+        contents = this.restructureContents(contents);
+
         return {
-            content: content,
+            content: contents,
             paragraphProperties: this.determineParagraphProperties(paragraph)
         };
     }

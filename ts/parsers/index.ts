@@ -1,12 +1,12 @@
-import ColorParser from "./colorparser";
-import PowerpointElementParser from "./elementparser";
+import ColorParser from "./colorParser";
+import PowerpointElementParser from "./elementParser";
 import GraphicFrameParser from "./graphicFrameParser";
 import PptGlobalsParser from "./pptGlobalsParser";
-import LineParser from "./lineparser";
-import ParagraphParser from "./paragraphparser";
+import LineParser from "./lineParser";
+import ParagraphParser from "./paragraphParser";
 import SlideParser from "./slideParser";
-import SlideRelationsParser from "./relparser";
-import ShapeParser from "./shapeparser";
+import SlideRelationsParser from "./relParser";
+import ShapeParser from "./shapeParser";
 
 export {
     ColorParser,
