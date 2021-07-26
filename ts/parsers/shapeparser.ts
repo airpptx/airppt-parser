@@ -1,5 +1,5 @@
 import { checkPath, getValueAtPath } from "../helpers";
-import { ColorParser, LineParser } from "./";
+import { ColorParser, LineParser, ParagraphParser } from "./";
 import { PowerpointElement, SpecialityType } from "airppt-models-plus/pptelement";
 
 /**
@@ -15,15 +15,16 @@ export default class ShapeParser {
         if (element["p:nvPicPr"]) {
             return SpecialityType.Image;
         }
+
+        if (ParagraphParser.isTitle(element)) {
+            return SpecialityType.Title;
+        }
+
         if (checkPath(element, '["p:txBody"][0]["a:p"]')) {
             return SpecialityType.Paragraph;
         }
         if (checkPath(element, '["a:graphic"][0]["a:graphicData"][0]["a:tbl"]')) {
             return SpecialityType.Table;
-        }
-
-        if (getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle") {
-            return SpecialityType.Title;
         }
 
         return SpecialityType.None;

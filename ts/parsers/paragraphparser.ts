@@ -40,6 +40,13 @@ export default class ParagraphParser {
         return contents;
     }
 
+    public static isTitle(element): boolean {
+        return (
+            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle" ||
+            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "title"
+        );
+    }
+
     public static isList(paragraph): boolean {
         return (
             checkPath(paragraph, '["a:pPr"][0]["a:buAutoNum"]') ||

@@ -1,11 +1,6 @@
 import { checkPath, getValueAtPath } from "../helpers";
 import { PowerpointElement } from "airppt-models-plus/pptelement";
-import {
-    GraphicFrameParser,
-    ShapeParser,
-    SlideRelationsParser,
-    ParagraphParser
-} from "./";
+import { GraphicFrameParser, ShapeParser, SlideRelationsParser, ParagraphParser } from "./";
 import { cleanupJson } from "../utils/common";
 import * as isEmpty from "lodash.isempty";
 
@@ -34,10 +29,7 @@ class PowerpointElementParser {
                     this.element["p:nvSpPr"][0]["p:cNvPr"][0]["$"]["title"] ||
                     this.element["p:nvSpPr"][0]["p:cNvPr"][0]["$"]["name"].replace(/\s/g, "");
 
-                if (getValueAtPath(this.element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle") {
-                    isTitle = true;
-                }
-
+                isTitle = ParagraphParser.isTitle(this.element);
                 //elements must have a position, or else ignore them. TO-DO: Allow Placeholder positions
                 if (!isTitle && !this.element["p:spPr"][0]["a:xfrm"]) {
                     return null;
@@ -64,7 +56,10 @@ class PowerpointElementParser {
             else if (checkPath(this.element, '["a:graphic"][0]["a:graphicData"][0]["a:tbl"]')) {
                 elementName =
                     this.element["p:nvGraphicFramePr"][0]["p:cNvPr"][0]["$"]["title"] ||
-                    this.element["p:nvGraphicFramePr"][0]["p:cNvPr"][0]["$"]["name"].replace(/\s/g, "");
+                    this.element["p:nvGraphicFramePr"][0]["p:cNvPr"][0]["$"]["name"].replace(
+                        /\s/g,
+                        ""
+                    );
 
                 if (!this.element["p:xfrm"]) {
                     return null;
@@ -75,7 +70,9 @@ class PowerpointElementParser {
                 table = GraphicFrameParser.extractTableElements(this.element);
             }
 
-            const elementPresetType = getValueAtPath(this.element, '["p:spPr"][0]["a:prstGeom"][0]["$"]["prst"]') || "none";
+            const elementPresetType =
+                getValueAtPath(this.element, '["p:spPr"][0]["a:prstGeom"][0]["$"]["prst"]') ||
+                "none";
 
             const paragraphInfo = getValueAtPath(this.element, '["p:txBody"][0]["a:p"]');
 
