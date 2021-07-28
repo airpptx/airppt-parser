@@ -9,7 +9,11 @@ export const getAttributeByPath = (slideAttributes, pathArray: string[]) => {
     }
 
     for (const node of pathArray) {
-        slideAttributes = slideAttributes[node] || slideAttributes[0][node];
+        if (Array.isArray(slideAttributes)) {
+            slideAttributes = slideAttributes[node] || slideAttributes[0][node];
+        } else {
+            slideAttributes = slideAttributes[node];
+        }
         if (slideAttributes === undefined) {
             return [];
         }
