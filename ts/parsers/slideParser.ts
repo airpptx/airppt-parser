@@ -3,13 +3,12 @@ import { getAttributeByPath, ZipHandler } from "../helpers";
 import { GraphicFrameParser, PowerpointElementParser } from "./";
 
 export default class SlideParser {
-    public static getMasterLayout() {}
 
     public static async getSlideLayout(slideRelations) {
         // Read relationship filename of the slide (Get slideLayoutXX.xml)
         // @sldFileName: ppt/slides/slide1.xml
         // @resName: ppt/slides/_rels/slide1.xml.rels
-        const relationshipArray = slideRelations["Relationships"]["Relationship"];
+        let relationshipArray = slideRelations["Relationships"]["Relationship"];
         let layoutFilename = "";
         if (relationshipArray.constructor === Array) {
             for (const relationship of relationshipArray) {
@@ -26,7 +25,36 @@ export default class SlideParser {
         }
         // Open slideLayoutXX.xml
         const slideLayoutContent = await ZipHandler.parseSlideAttributes(layoutFilename);
-        return this.indexNodes(slideLayoutContent);
+
+        // Read slide master filename of the slidelayout (Get slideMasterXX.xml)
+        // @resName: ppt/slideLayouts/slideLayout1.xml
+        // @masterName: ppt/slideLayouts/_rels/slideLayout1.xml.rels
+        const slideLayoutResFilename =
+            layoutFilename.replace("slideLayouts/slideLayout", "slideLayouts/_rels/slideLayout") +
+            ".rels";
+        const slideLayoutResContent = await ZipHandler.parseSlideAttributes(slideLayoutResFilename);
+        relationshipArray = slideLayoutResContent["Relationships"]["Relationship"];
+        let masterFilename = "";
+        if (relationshipArray.constructor === Array) {
+            for (const relationship of relationshipArray) {
+                if (
+                    relationship["$"]["Type"] ===
+                    "http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster"
+                ) {
+                    masterFilename = relationship["$"]["Target"].replace("../", "ppt/");
+                    break;
+                }
+            }
+        } else {
+            masterFilename = relationshipArray["$"]["Target"].replace("../", "ppt/");
+        }
+        // Open slideMasterXX.xml
+        const slideMasterContent = await ZipHandler.parseSlideAttributes(masterFilename);
+
+        return {
+            slideLayoutTable: this.indexNodes(slideLayoutContent),
+            slideMasterTables: this.indexNodes(slideMasterContent)
+        };
     }
 
     public static indexNodes(content) {
@@ -108,7 +136,7 @@ export default class SlideParser {
         const slideRelations = await ZipHandler.parseSlideAttributes(
             format("ppt/slides/_rels/slide{0}.xml.rels", slideNumber)
         );
-        const slideLayout = await this.getSlideLayout(slideRelations);
+        const { slideMasterTables, slideLayoutTable } = await this.getSlideLayout(slideRelations);
         const slideData = slideAttributes["p:sld"]["p:cSld"];
 
         //@todo: PROBLEM - Layering Order not Preserved, Shapes Render First, Need to fix
