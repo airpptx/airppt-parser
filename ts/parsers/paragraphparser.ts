@@ -11,6 +11,8 @@ import {
     ListType
 } from "airppt-models-plus/pptelement";
 
+import * as cloneDeep from "lodash.clonedeep";
+
 /**
  * Parse the paragraph elements
  */
@@ -42,8 +44,10 @@ export default class ParagraphParser {
 
     public static isTitle(element): boolean {
         return (
-            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle" ||
-            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "title"
+            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') ===
+                "ctrTitle" ||
+            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') ===
+                "title"
         );
     }
 
@@ -203,7 +207,7 @@ export default class ParagraphParser {
                 //check if we previously had the list items then push the list in paragraphs
                 if (paragraph.list.listItems.length > 0) {
                     paragraph.list = this.restructureList(paragraph.list);
-                    allParagraphs.push(paragraph);
+                    allParagraphs.push(cloneDeep(paragraph));
                     paragraph.list.listItems = [];
                 }
                 allParagraphs.push(this.getParagraph(paragraphItem));
