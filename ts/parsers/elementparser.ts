@@ -7,8 +7,22 @@ import * as isEmpty from "lodash.isempty";
 /**
  * Entry point for all Parsers
  */
+const SUPPORTED_PLACEHOLDERS = ["body", "ctrTitle", "pic", "subTitle", "tbl", "title"];
 class PowerpointElementParser {
     private element;
+
+    public isNonSupportedPlaceholder() {
+        if (checkPath(this.element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]')) {
+            const type = getValueAtPath(
+                this.element,
+                '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]'
+            );
+            if (!SUPPORTED_PLACEHOLDERS.includes(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public getLayoutSpNodes(slideLayoutTables, slideMasterTables) {
         const idx =
@@ -85,6 +99,10 @@ class PowerpointElementParser {
                 return null;
             }
             this.element = rawElement;
+
+            if (this.isNonSupportedPlaceholder()) {
+                return null;
+            }
 
             let elementName = "";
             let table = null;
