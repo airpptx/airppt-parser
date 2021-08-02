@@ -1,9 +1,8 @@
 import * as format from "string-template";
 import { getAttributeByPath, ZipHandler } from "../helpers";
-import { GraphicFrameParser, PowerpointElementParser } from "./";
+import { GraphicFrameParser, PowerpointElementParser, SlideRelationsParser } from "./";
 
 export default class SlideParser {
-
     public static async getSlideLayout(slideRelations) {
         // Read relationship filename of the slide (Get slideLayoutXX.xml)
         // @sldFileName: ppt/slides/slide1.xml
@@ -52,7 +51,7 @@ export default class SlideParser {
         const slideMasterContent = await ZipHandler.parseSlideAttributes(masterFilename);
 
         return {
-            slideLayoutTable: this.indexNodes(slideLayoutContent),
+            slideLayoutTables: this.indexNodes(slideLayoutContent),
             slideMasterTables: this.indexNodes(slideMasterContent)
         };
     }
@@ -136,7 +135,7 @@ export default class SlideParser {
         const slideRelations = await ZipHandler.parseSlideAttributes(
             format("ppt/slides/_rels/slide{0}.xml.rels", slideNumber)
         );
-        const { slideMasterTables, slideLayoutTable } = await this.getSlideLayout(slideRelations);
+        const { slideMasterTables, slideLayoutTables } = await this.getSlideLayout(slideRelations);
         const slideData = slideAttributes["p:sld"]["p:cSld"];
 
         //@todo: PROBLEM - Layering Order not Preserved, Shapes Render First, Need to fix
@@ -149,7 +148,12 @@ export default class SlideParser {
         const allParsedSlideElements = [];
 
         for (const slideElement of allSlideElements) {
-            const pptElement = PPTElementParser.getProcessedElement(slideElement, slideRelations);
+            const pptElement = PPTElementParser.getProcessedElement(
+                slideElement,
+                slideLayoutTables,
+                slideMasterTables,
+                slideRelations
+            );
 
             //throwout any undrenderable content
             if (pptElement) {
