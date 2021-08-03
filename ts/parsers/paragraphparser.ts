@@ -59,7 +59,10 @@ export default class ParagraphParser {
     }
 
     public static getParagraph(paragraph): Paragraph {
-        const textElements = paragraph["a:r"] || [];
+        const textElements = paragraph["a:r"];
+        if(!textElements) {
+            return null;
+        }
         let contents = textElements.map((txtElement) => {
             const content: Content = {
                 text: txtElement["a:t"] || "",
@@ -137,6 +140,7 @@ export default class ParagraphParser {
         let currentLevel = -1;
 
         for (const paragraphItem of paragraphs) {
+            const parsedParagraph = this.getParagraph(paragraphItem);
             if (this.isList(paragraphItem)) {
                 const listLevel = this.getListlevel(paragraphItem);
 
@@ -156,13 +160,13 @@ export default class ParagraphParser {
                         currentLevel++;
                     }
                     currentParagraph.list.listType = this.getListType(paragraphItem);
-                    currentParagraph.list.listItems.push(this.getParagraph(paragraphItem));
+                    parsedParagraph && currentParagraph.list.listItems.push(parsedParagraph);
                     stack.push(currentParagraph);
                     currentLevel++;
                 }
                 //if the level is same keep pushing the list items in the same array
                 else if (listLevel === currentLevel) {
-                    currentParagraph.list.listItems.push(this.getParagraph(paragraphItem));
+                    parsedParagraph && currentParagraph.list.listItems.push(parsedParagraph);
                 } else if (listLevel > currentLevel) {
                     //edge case to handle if multiple levels are jumped ahead
                     //create empty paragraphs/lists to maintain hierarchy and fill in the level gaps
@@ -183,7 +187,9 @@ export default class ParagraphParser {
                     const newParagraph: Paragraph = {
                         list: {
                             listType: this.getListType(paragraphItem),
-                            listItems: [this.getParagraph(paragraphItem)]
+                            // listItems: [this.getParagraph(paragraphItem)]
+                            listItems: parsedParagraph ? [parsedParagraph] : []
+
                         }
                     };
                     currentParagraph.list.listItems.push(newParagraph);
@@ -200,7 +206,7 @@ export default class ParagraphParser {
                     }
                     //and push the new item as a sibling
                     currentParagraph = stack[stack.length - 1];
-                    currentParagraph.list.listItems.push(this.getParagraph(paragraphItem));
+                    parsedParagraph && currentParagraph.list.listItems.push(parsedParagraph);
                 }
             } else {
                 //if the paragraph was not a list item
@@ -211,7 +217,7 @@ export default class ParagraphParser {
                     paragraph.list.listItems = [];
                 }
                 //normal paragraph content
-                allParagraphs.push(this.getParagraph(paragraphItem));
+                parsedParagraph && allParagraphs.push(parsedParagraph);
             }
         }
         //true if there were only list items in the text box, push them
