@@ -11,6 +11,8 @@ import {
     ListType
 } from "airppt-models-plus/pptelement";
 
+import * as cloneDeep from "lodash.clonedeep";
+
 /**
  * Parse the paragraph elements
  */
@@ -205,7 +207,7 @@ export default class ParagraphParser {
                 //check if we previously had the list items then push the list in paragraphs
                 if (paragraph.list.listItems.length > 0) {
                     paragraph.list = this.restructureList(paragraph.list);
-                    allParagraphs.push(paragraph);
+                    allParagraphs.push(cloneDeep(paragraph));
                     paragraph.list.listItems = [];
                 }
                 //normal paragraph content
