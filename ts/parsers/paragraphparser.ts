@@ -42,8 +42,10 @@ export default class ParagraphParser {
 
     public static isTitle(element): boolean {
         return (
-            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle" ||
-            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "title"
+            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') ===
+                "ctrTitle" ||
+            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') ===
+                "title"
         );
     }
 
@@ -206,6 +208,7 @@ export default class ParagraphParser {
                     allParagraphs.push(paragraph);
                     paragraph.list.listItems = [];
                 }
+                //normal paragraph content
                 allParagraphs.push(this.getParagraph(paragraphItem));
             }
         }
@@ -220,18 +223,28 @@ export default class ParagraphParser {
 
     /**a:rPr */
     public static determineTextProperties(textProperties): Content["textCharacterProperties"] {
-        if (!textProperties) {
-            return null;
-        }
 
-        const textPropertiesElement: Content["textCharacterProperties"] = {
-            size: getValueAtPath(textProperties, '["$"].sz') || 1200,
-            fontAttributes: this.determineFontAttributes(textProperties["$"]),
-            font: getValueAtPath(textProperties, '["a:latin"][0]["$"]["typeface"]') || "Helvetica",
-            fillColor: ColorParser.getTextColors(textProperties) || "000000"
+        const defaultProperties: Content["textCharacterProperties"] = {
+            size: 1200,
+            fontAttributes: [],
+            font: "Helvetica",
+            fillColor: "000000"
         };
 
-        return textPropertiesElement;
+        if (!textProperties) {
+            return defaultProperties;
+        }
+
+        return {
+            size: getValueAtPath(textProperties, '["$"].sz') || defaultProperties.size,
+            fontAttributes:
+                this.determineFontAttributes(textProperties["$"]) ||
+                defaultProperties.fontAttributes,
+            font:
+                getValueAtPath(textProperties, '["a:latin"][0]["$"]["typeface"]') ||
+                defaultProperties.font,
+            fillColor: ColorParser.getTextColors(textProperties) || defaultProperties.fillColor
+        };
     }
 
     /** Parse for italics, bold, underline & strike through*/
