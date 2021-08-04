@@ -24,6 +24,24 @@ class PowerpointElementParser {
         return false;
     }
 
+    public isPlaceholderListElement(slideLayoutTables): boolean {
+        if (checkPath(this.element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["idx"]')) {
+            const placeholderIdx = getValueAtPath(
+                this.element,
+                '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["idx"]'
+            );
+            let slideLayoutSpNode = undefined;
+            slideLayoutSpNode = slideLayoutTables["idxTable"][placeholderIdx];
+
+            return (
+                slideLayoutSpNode !== undefined &&
+                checkPath(slideLayoutSpNode, '["p:txBody"][0]["a:p"][0]["a:pPr"][0]["$"]["lvl"]')
+            );
+        }
+
+        return false;
+    }
+
     public getLayoutSpNodes(slideLayoutTables, slideMasterTables) {
         const idx =
             getAttributeByPath(this.element, ["p:nvSpPr", "p:nvPr", "p:ph"]) === undefined
@@ -135,6 +153,7 @@ class PowerpointElementParser {
 
             const paragraphInfo = getValueAtPath(this.element, '["p:txBody"][0]["a:p"]');
             const { position, offset } = this.getPosition(slideLayoutTables, slideMasterTables);
+            const isPlaceholderList = this.isPlaceholderListElement(slideLayoutTables);
 
             let pptElement: PowerpointElement = {
                 name: elementName,
@@ -149,7 +168,10 @@ class PowerpointElementParser {
                     cy: offset?.cy
                 },
                 table: !isEmpty(table) && !isEmpty(table.rows) ? table : null,
-                paragraph: ParagraphParser.extractParagraphElements(paragraphInfo),
+                paragraph: ParagraphParser.extractParagraphElements(
+                    paragraphInfo,
+                    isPlaceholderList
+                ),
                 shape: ShapeParser.extractShapeElements(this.element),
                 links: SlideRelationsParser.resolveShapeHyperlinks(this.element)
             };

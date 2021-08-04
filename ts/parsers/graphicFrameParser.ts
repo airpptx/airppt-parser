@@ -69,7 +69,7 @@ export default class GraphicFrameParser {
                 }
 
                 const paragraphInfo = getValueAtPath(col, '["a:txBody"][0]["a:p"]');
-                let parsedParagraph = ParagraphParser.extractParagraphElements(paragraphInfo);
+                let parsedParagraph = ParagraphParser.extractParagraphElements(paragraphInfo, false);
                 //edge case to handle the empty cell, without this check it will be sent as { paragraph: { content: [], ....}}
                 //and that is considered as line break in our renderer
                 if (parsedParagraph.length === 1 && isEmpty(parsedParagraph[0].content)) {

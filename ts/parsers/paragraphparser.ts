@@ -51,16 +51,18 @@ export default class ParagraphParser {
         );
     }
 
-    public static isList(paragraph): boolean {
+    public static isList(paragraph, isListContent): boolean {
         return (
-            checkPath(paragraph, '["a:pPr"][0]["a:buAutoNum"]') ||
-            checkPath(paragraph, '["a:pPr"][0]["a:buChar"]')
+            (checkPath(paragraph, '["a:pPr"][0]["a:buAutoNum"]') ||
+                checkPath(paragraph, '["a:pPr"][0]["a:buChar"]') ||
+                isListContent) &&
+            checkPath(paragraph, '["a:pPr"][0]["a:buNone"]') === false
         );
     }
 
     public static getParagraph(paragraph): Paragraph {
         const textElements = paragraph["a:r"];
-        if(!textElements) {
+        if (!textElements) {
             return null;
         }
         let contents = textElements.map((txtElement) => {
@@ -123,7 +125,7 @@ export default class ParagraphParser {
         return list;
     }
 
-    public static extractParagraphElements(paragraphs: any[]): PowerpointElement["paragraph"] {
+    public static extractParagraphElements(paragraphs: any[], isListContent): PowerpointElement["paragraph"] {
         if (!paragraphs || paragraphs.length === 0) {
             return null;
         }
@@ -141,7 +143,7 @@ export default class ParagraphParser {
 
         for (const paragraphItem of paragraphs) {
             const parsedParagraph = this.getParagraph(paragraphItem);
-            if (this.isList(paragraphItem)) {
+            if (this.isList(paragraphItem, isListContent)) {
                 const listLevel = this.getListlevel(paragraphItem);
 
                 // if its the first of the list kind
@@ -189,7 +191,6 @@ export default class ParagraphParser {
                             listType: this.getListType(paragraphItem),
                             // listItems: [this.getParagraph(paragraphItem)]
                             listItems: parsedParagraph ? [parsedParagraph] : []
-
                         }
                     };
                     currentParagraph.list.listItems.push(newParagraph);
@@ -231,7 +232,6 @@ export default class ParagraphParser {
 
     /**a:rPr */
     public static determineTextProperties(textProperties): Content["textCharacterProperties"] {
-
         const defaultProperties: Content["textCharacterProperties"] = {
             size: 1200,
             fontAttributes: [],
