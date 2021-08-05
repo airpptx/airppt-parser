@@ -21,6 +21,7 @@ class PowerpointElementParser {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -68,10 +69,17 @@ class PowerpointElementParser {
         return { slideLayoutSpNode, slideMasterSpNode };
     }
 
-    public getPosition(slideLayoutTables, slideMasterTables) {
+    public getXfrmNodePosition(xfrmNode) {
         let position: PowerpointElement["elementPosition"] = null;
         let offset: PowerpointElement["elementOffsetPosition"] = null;
 
+        position = checkPath(xfrmNode, '["a:off"][0]["$"]') ? xfrmNode["a:off"][0]["$"] : position;
+        offset = checkPath(xfrmNode, '["a:off"][0]["$"]') ? xfrmNode["a:ext"][0]["$"] : offset;
+
+        return { position, offset };
+    }
+
+    public getPosition(slideLayoutTables, slideMasterTables) {
         const { slideLayoutSpNode, slideMasterSpNode } = this.getLayoutSpNodes(
             slideLayoutTables,
             slideMasterTables
@@ -82,28 +90,19 @@ class PowerpointElementParser {
         const slideLayoutXfrmNode = getValueAtPath(slideLayoutSpNode, xfrmNodePath);
         const slideMasterXfrmNode = getValueAtPath(slideMasterSpNode, xfrmNodePath);
 
-        if (slideXfrmNode && checkPath(slideXfrmNode, '["a:off"][0]["$"]')) {
-            position = slideXfrmNode["a:off"][0]["$"];
-            offset = slideXfrmNode["a:ext"][0]["$"];
-
-            return { position, offset };
+        if (slideXfrmNode) {
+            return this.getXfrmNodePosition(slideXfrmNode);
         }
 
-        if (slideLayoutXfrmNode && checkPath(slideLayoutXfrmNode, '["a:off"][0]["$"]')) {
-            position = slideLayoutXfrmNode["a:off"][0]["$"];
-            offset = slideLayoutXfrmNode["a:ext"][0]["$"];
-
-            return { position, offset };
+        if (slideLayoutXfrmNode) {
+            return this.getXfrmNodePosition(slideLayoutXfrmNode);
         }
 
-        if (slideMasterXfrmNode && checkPath(slideMasterXfrmNode, '["a:off"][0]["$"]')) {
-            position = slideMasterXfrmNode["a:off"][0]["$"];
-            offset = slideMasterXfrmNode["a:ext"][0]["$"];
-
-            return { position, offset };
+        if (slideMasterXfrmNode) {
+            return this.getXfrmNodePosition(slideMasterXfrmNode);
         }
 
-        return { position, offset };
+        return { position: null, offset: null };
     }
     public getProcessedElement(
         rawElement,
