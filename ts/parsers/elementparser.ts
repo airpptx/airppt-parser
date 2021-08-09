@@ -36,7 +36,8 @@ class PowerpointElementParser {
 
             return (
                 slideLayoutSpNode !== undefined &&
-                checkPath(slideLayoutSpNode, '["p:txBody"][0]["a:p"][0]["a:pPr"][0]["$"]["lvl"]')
+                checkPath(slideLayoutSpNode, '["p:txBody"][0]["a:p"][0]["a:pPr"][0]["$"]["lvl"]') &&
+                checkPath(slideLayoutSpNode, '["p:txBody"][0]["a:lstStyle"][0]["a:lvl1pPr"][0]["a:buNone"]') === false
             );
         }
 
@@ -104,6 +105,7 @@ class PowerpointElementParser {
 
         return { position: null, offset: null };
     }
+
     public getProcessedElement(
         rawElement,
         slideLayoutTables,
