@@ -1,6 +1,7 @@
 import * as format from "string-template";
+import { SCHEMAS_URI } from "../utils/constants";
 import { getAttributeByPath, ZipHandler } from "../helpers";
-import { GraphicFrameParser, PowerpointElementParser, SlideRelationsParser } from "./";
+import { GraphicFrameParser, PowerpointElementParser } from "./";
 
 export default class SlideParser {
     public static async getSlideLayout(slideRelations) {
@@ -9,12 +10,9 @@ export default class SlideParser {
         // @resName: ppt/slides/_rels/slide1.xml.rels
         let relationshipArray = slideRelations["Relationships"]["Relationship"];
         let layoutFilename = "";
-        if (relationshipArray.constructor === Array) {
+        if (Array.isArray(relationshipArray)) {
             for (const relationship of relationshipArray) {
-                if (
-                    relationship["$"]["Type"] ===
-                    "http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout"
-                ) {
+                if (relationship["$"]["Type"] === SCHEMAS_URI.SLIDE_LAYOUT) {
                     layoutFilename = relationship["$"]["Target"].replace("../", "ppt/");
                     break;
                 }
@@ -29,17 +27,13 @@ export default class SlideParser {
         // @resName: ppt/slideLayouts/slideLayout1.xml
         // @masterName: ppt/slideLayouts/_rels/slideLayout1.xml.rels
         const slideLayoutResFilename =
-            layoutFilename.replace("slideLayouts/slideLayout", "slideLayouts/_rels/slideLayout") +
-            ".rels";
+            layoutFilename.replace("slideLayouts/slideLayout", "slideLayouts/_rels/slideLayout") + ".rels";
         const slideLayoutResContent = await ZipHandler.parseSlideAttributes(slideLayoutResFilename);
         relationshipArray = slideLayoutResContent["Relationships"]["Relationship"];
         let masterFilename = "";
-        if (relationshipArray.constructor === Array) {
+        if (Array.isArray(relationshipArray)) {
             for (const relationship of relationshipArray) {
-                if (
-                    relationship["$"]["Type"] ===
-                    "http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster"
-                ) {
+                if (relationship["$"]["Type"] === SCHEMAS_URI.SLIDE_MASTER) {
                     masterFilename = relationship["$"]["Target"].replace("../", "ppt/");
                     break;
                 }
@@ -72,22 +66,12 @@ export default class SlideParser {
 
                 var targetNode = spTreeNode[key];
 
-                if (targetNode.constructor === Array) {
+                if (Array.isArray(targetNode)) {
                     for (const node of targetNode) {
                         const nvSpPrNode = node["p:nvSpPr"];
                         const id = getAttributeByPath(nvSpPrNode[0], ["p:cNvPr", "$", "id"]);
-                        const idx = getAttributeByPath(nvSpPrNode[0], [
-                            "p:nvPr",
-                            "p:ph",
-                            "$",
-                            "idx"
-                        ]);
-                        const type = getAttributeByPath(nvSpPrNode[0], [
-                            "p:nvPr",
-                            "p:ph",
-                            "$",
-                            "type"
-                        ]);
+                        const idx = getAttributeByPath(nvSpPrNode[0], ["p:nvPr", "p:ph", "$", "idx"]);
+                        const type = getAttributeByPath(nvSpPrNode[0], ["p:nvPr", "p:ph", "$", "type"]);
 
                         if (id !== undefined) {
                             idTable[id] = node;
@@ -123,25 +107,18 @@ export default class SlideParser {
         }
     }
 
-    public static async getSlideElements(
-        PPTElementParser: PowerpointElementParser,
-        slideNumber
-    ): Promise<any[]> {
+    public static async getSlideElements(PPTElementParser: PowerpointElementParser, slideNumber): Promise<any[]> {
         //Get all of Slide Shapes and Elements
-        const slideAttributes = await ZipHandler.parseSlideAttributes(
-            format("ppt/slides/slide{0}.xml", slideNumber)
-        );
+        const slideAttributes = await ZipHandler.parseSlideAttributes(format("ppt/slides/slide{0}.xml", slideNumber));
         //Contains references to links,images and etc on a Slide
         const slideRelations = await ZipHandler.parseSlideAttributes(
             format("ppt/slides/_rels/slide{0}.xml.rels", slideNumber)
         );
         const { slideMasterTables, slideLayoutTables } = await this.getSlideLayout(slideRelations);
         const slideData = slideAttributes["p:sld"]["p:cSld"];
-
-        //@todo: PROBLEM - Layering Order not Preserved, Shapes Render First, Need to fix
-        const slideShapes = getAttributeByPath(slideData, ["p:spTree", "p:sp"]);
-        const slideImages = getAttributeByPath(slideData, ["p:spTree", "p:pic"]);
-        const graphicFrames = getAttributeByPath(slideData, ["p:spTree", "p:graphicFrame"]);
+        const slideShapes = getAttributeByPath(slideData, ["p:spTree", "p:sp"], []);
+        const slideImages = getAttributeByPath(slideData, ["p:spTree", "p:pic"], []);
+        const graphicFrames = getAttributeByPath(slideData, ["p:spTree", "p:graphicFrame"], []);
         const slideTables = GraphicFrameParser.processGraphicFrameNodes(graphicFrames);
 
         const allSlideElements = [...slideShapes, ...slideImages, ...slideTables];

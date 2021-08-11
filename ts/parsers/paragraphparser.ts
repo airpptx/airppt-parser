@@ -44,10 +44,8 @@ export default class ParagraphParser {
 
     public static isTitle(element): boolean {
         return (
-            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') ===
-                "ctrTitle" ||
-            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') ===
-                "title"
+            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle" ||
+            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "title"
         );
     }
 
@@ -68,9 +66,7 @@ export default class ParagraphParser {
         let contents = textElements.map((txtElement) => {
             const content: Content = {
                 text: txtElement["a:t"] || "",
-                textCharacterProperties: this.determineTextProperties(
-                    getValueAtPath(txtElement, '["a:rPr"][0]')
-                )
+                textCharacterProperties: this.determineTextProperties(getValueAtPath(txtElement, '["a:rPr"][0]'))
             };
 
             const hyperlink = SlideRelationsParser.resolveParagraphHyperlink(txtElement);
@@ -245,12 +241,8 @@ export default class ParagraphParser {
 
         return {
             size: getValueAtPath(textProperties, '["$"].sz') || defaultProperties.size,
-            fontAttributes:
-                this.determineFontAttributes(textProperties["$"]) ||
-                defaultProperties.fontAttributes,
-            font:
-                getValueAtPath(textProperties, '["a:latin"][0]["$"]["typeface"]') ||
-                defaultProperties.font,
+            fontAttributes: this.determineFontAttributes(textProperties["$"]) || defaultProperties.fontAttributes,
+            font: getValueAtPath(textProperties, '["a:latin"][0]["$"]["typeface"]') || defaultProperties.font,
             fillColor: ColorParser.getTextColors(textProperties) || defaultProperties.fillColor
         };
     }
@@ -279,9 +271,7 @@ export default class ParagraphParser {
     }
 
     /**a:pPr */
-    public static determineParagraphProperties(
-        paragraphProperties
-    ): Paragraph["paragraphProperties"] {
+    public static determineParagraphProperties(paragraphProperties): Paragraph["paragraphProperties"] {
         if (!paragraphProperties) {
             return null;
         }

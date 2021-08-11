@@ -17,7 +17,10 @@ export default class ZipHandler {
 
     public static async parseSlideAttributes(fileName) {
         let presentationSlide = await this.zipResult.file(fileName).async("text");
-        let parsedPresentationSlide = await xml2js(presentationSlide, { trim: true, preserveChildrenOrderForMixedContent: true });
+        let parsedPresentationSlide = await xml2js(presentationSlide, {
+            trim: true,
+            preserveChildrenOrderForMixedContent: true
+        });
 
         return parsedPresentationSlide;
     }
