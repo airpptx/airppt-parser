@@ -9,10 +9,11 @@ export const getAttributeByPath = (slideAttributes, pathArray: string[], returnV
 
     for (const node of pathArray) {
         if (Array.isArray(slideAttributes)) {
-            slideAttributes = slideAttributes[node] || slideAttributes[0][node];
-        } else {
-            slideAttributes = slideAttributes[node];
+            //get the first index and that will be an object,
+            //so far haven't seen arrays of arrays in OOXML structure
+            slideAttributes = slideAttributes[0];
         }
+        slideAttributes = slideAttributes[node];
         if (slideAttributes === undefined) {
             return returnValue;
         }
