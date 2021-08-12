@@ -4,26 +4,28 @@ import fs = require("fs");
 import * as xml2js from "xml2js-es6-promise";
 
 export default class ZipHandler {
-    private static zip = new JSZip();
+    private static readonly zip = new JSZip();
     private static zipResult: JSZip;
 
-    public static loadZip(zipFilePath: string): Promise<Boolean> {
-        return new Promise(async (resolve) => {
-            let data = await this.readFileBuffer(zipFilePath);
-            this.zipResult = await this.zip.loadAsync(data);
-            resolve(true);
-        });
+    public static async loadZip(zipFilePath: string) {
+            const data = await this.readFileBuffer(zipFilePath);
+            this.zipResult = await this.zip.loadAsync(data).catch(error => {
+                throw error;
+            });
     }
 
     public static async parseSlideAttributes(fileName) {
-        let presentationSlide = await this.zipResult.file(fileName).async("text");
-        let parsedPresentationSlide = await xml2js(presentationSlide, { trim: true, preserveChildrenOrderForMixedContent: true });
+        const presentationSlide = await this.zipResult.file(fileName).async("text");
+        const parsedPresentationSlide = await xml2js(presentationSlide, {
+            trim: true,
+            preserveChildrenOrderForMixedContent: true
+        });
 
         return parsedPresentationSlide;
     }
 
     public static async getFileInZip(fileName) {
-        let file = await this.zipResult.file(fileName).async("base64");
+        const file = await this.zipResult.file(fileName).async("base64");
         return file;
     }
 

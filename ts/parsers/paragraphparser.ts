@@ -44,28 +44,29 @@ export default class ParagraphParser {
 
     public static isTitle(element): boolean {
         return (
-            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') ===
-                "ctrTitle" ||
-            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') ===
-                "title"
+            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "ctrTitle" ||
+            getValueAtPath(element, '["p:nvSpPr"][0]["p:nvPr"][0]["p:ph"][0]["$"]["type"]') === "title"
         );
     }
 
-    public static isList(paragraph): boolean {
+    public static isList(paragraph, isListContent): boolean {
         return (
-            checkPath(paragraph, '["a:pPr"][0]["a:buAutoNum"]') ||
-            checkPath(paragraph, '["a:pPr"][0]["a:buChar"]')
+            (checkPath(paragraph, '["a:pPr"][0]["a:buAutoNum"]') ||
+                checkPath(paragraph, '["a:pPr"][0]["a:buChar"]') ||
+                isListContent) &&
+            checkPath(paragraph, '["a:pPr"][0]["a:buNone"]') === false
         );
     }
 
     public static getParagraph(paragraph): Paragraph {
-        const textElements = paragraph["a:r"] || [];
+        const textElements = paragraph["a:r"];
+        if (!textElements) {
+            return null;
+        }
         let contents = textElements.map((txtElement) => {
             const content: Content = {
                 text: txtElement["a:t"] || "",
-                textCharacterProperties: this.determineTextProperties(
-                    getValueAtPath(txtElement, '["a:rPr"][0]')
-                )
+                textCharacterProperties: this.determineTextProperties(getValueAtPath(txtElement, '["a:rPr"][0]'))
             };
 
             const hyperlink = SlideRelationsParser.resolveParagraphHyperlink(txtElement);
@@ -120,7 +121,7 @@ export default class ParagraphParser {
         return list;
     }
 
-    public static extractParagraphElements(paragraphs: any[]): PowerpointElement["paragraph"] {
+    public static extractParagraphElements(paragraphs: any[], isListContent): PowerpointElement["paragraph"] {
         if (!paragraphs || paragraphs.length === 0) {
             return null;
         }
@@ -137,7 +138,8 @@ export default class ParagraphParser {
         let currentLevel = -1;
 
         for (const paragraphItem of paragraphs) {
-            if (this.isList(paragraphItem)) {
+            const parsedParagraph = this.getParagraph(paragraphItem);
+            if (this.isList(paragraphItem, isListContent)) {
                 const listLevel = this.getListlevel(paragraphItem);
 
                 // if its the first of the list kind
@@ -156,13 +158,13 @@ export default class ParagraphParser {
                         currentLevel++;
                     }
                     currentParagraph.list.listType = this.getListType(paragraphItem);
-                    currentParagraph.list.listItems.push(this.getParagraph(paragraphItem));
+                    parsedParagraph && currentParagraph.list.listItems.push(parsedParagraph);
                     stack.push(currentParagraph);
                     currentLevel++;
                 }
                 //if the level is same keep pushing the list items in the same array
                 else if (listLevel === currentLevel) {
-                    currentParagraph.list.listItems.push(this.getParagraph(paragraphItem));
+                    parsedParagraph && currentParagraph.list.listItems.push(parsedParagraph);
                 } else if (listLevel > currentLevel) {
                     //edge case to handle if multiple levels are jumped ahead
                     //create empty paragraphs/lists to maintain hierarchy and fill in the level gaps
@@ -183,7 +185,8 @@ export default class ParagraphParser {
                     const newParagraph: Paragraph = {
                         list: {
                             listType: this.getListType(paragraphItem),
-                            listItems: [this.getParagraph(paragraphItem)]
+                            // listItems: [this.getParagraph(paragraphItem)]
+                            listItems: parsedParagraph ? [parsedParagraph] : []
                         }
                     };
                     currentParagraph.list.listItems.push(newParagraph);
@@ -200,7 +203,7 @@ export default class ParagraphParser {
                     }
                     //and push the new item as a sibling
                     currentParagraph = stack[stack.length - 1];
-                    currentParagraph.list.listItems.push(this.getParagraph(paragraphItem));
+                    parsedParagraph && currentParagraph.list.listItems.push(parsedParagraph);
                 }
             } else {
                 //if the paragraph was not a list item
@@ -210,7 +213,8 @@ export default class ParagraphParser {
                     allParagraphs.push(cloneDeep(paragraph));
                     paragraph.list.listItems = [];
                 }
-                allParagraphs.push(this.getParagraph(paragraphItem));
+                //normal paragraph content
+                parsedParagraph && allParagraphs.push(parsedParagraph);
             }
         }
         //true if there were only list items in the text box, push them
@@ -224,18 +228,23 @@ export default class ParagraphParser {
 
     /**a:rPr */
     public static determineTextProperties(textProperties): Content["textCharacterProperties"] {
-        if (!textProperties) {
-            return null;
-        }
-
-        const textPropertiesElement: Content["textCharacterProperties"] = {
-            size: getValueAtPath(textProperties, '["$"].sz') || 1200,
-            fontAttributes: this.determineFontAttributes(textProperties["$"]),
-            font: getValueAtPath(textProperties, '["a:latin"][0]["$"]["typeface"]') || "Helvetica",
-            fillColor: ColorParser.getTextColors(textProperties) || "000000"
+        const defaultProperties: Content["textCharacterProperties"] = {
+            size: 1200,
+            fontAttributes: [],
+            font: "Helvetica",
+            fillColor: "000000"
         };
 
-        return textPropertiesElement;
+        if (!textProperties) {
+            return defaultProperties;
+        }
+
+        return {
+            size: getValueAtPath(textProperties, '["$"].sz') || defaultProperties.size,
+            fontAttributes: this.determineFontAttributes(textProperties["$"]) || defaultProperties.fontAttributes,
+            font: getValueAtPath(textProperties, '["a:latin"][0]["$"]["typeface"]') || defaultProperties.font,
+            fillColor: ColorParser.getTextColors(textProperties) || defaultProperties.fillColor
+        };
     }
 
     /** Parse for italics, bold, underline & strike through*/
@@ -262,9 +271,7 @@ export default class ParagraphParser {
     }
 
     /**a:pPr */
-    public static determineParagraphProperties(
-        paragraphProperties
-    ): Paragraph["paragraphProperties"] {
+    public static determineParagraphProperties(paragraphProperties): Paragraph["paragraphProperties"] {
         if (!paragraphProperties) {
             return null;
         }

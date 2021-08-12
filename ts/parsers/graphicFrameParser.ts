@@ -4,6 +4,7 @@ import { getAttributeByPath, getValueAtPath } from "../helpers";
 import * as isEmpty from "lodash.isempty";
 import { TableDesign } from "airppt-models-plus/pptelement";
 import { ParagraphParser } from "./";
+import { SCHEMAS_URI } from "../utils/constants";
 
 export default class GraphicFrameParser {
     public static processGraphicFrameNodes = (graphicFrames) => {
@@ -13,12 +14,12 @@ export default class GraphicFrameParser {
             const graphicTypeUri = getAttributeByPath([frame], ["a:graphic", "a:graphicData", "$", "uri"]);
 
             switch (graphicTypeUri) {
-                case "http://schemas.openxmlformats.org/drawingml/2006/table":
+                case SCHEMAS_URI.TABLE:
                     result.push(frame);
                     break;
-                case "http://schemas.openxmlformats.org/drawingml/2006/chart":
+                case SCHEMAS_URI.CHART:
                     break;
-                case "http://schemas.openxmlformats.org/drawingml/2006/diagram":
+                case SCHEMAS_URI.DIAGRAM:
                     break;
                 default:
             }
@@ -42,7 +43,11 @@ export default class GraphicFrameParser {
     };
 
     public static extractTableElements = (frame) => {
-        const rawTable = getAttributeByPath([frame], ["a:graphic", "a:graphicData", "a:tbl"]);
+        const rawTable = getAttributeByPath([frame], ["a:graphic", "a:graphicData", "a:tbl"], []);
+
+        if (rawTable.length === 0) {
+            return null;
+        }
         const rawRows = rawTable[0]["a:tr"] ? rawTable[0]["a:tr"] : [];
 
         //TODO: column width mapping to be done here using rawTable[a:tblGrid]
@@ -58,7 +63,7 @@ export default class GraphicFrameParser {
             });
 
             cols = cols.map((col) => {
-                let meta = {};
+                const meta = {};
                 if (col["$"]) {
                     if (col["$"]["rowSpan"]) {
                         meta["rowSpan"] = col["$"]["rowSpan"];
@@ -69,7 +74,7 @@ export default class GraphicFrameParser {
                 }
 
                 const paragraphInfo = getValueAtPath(col, '["a:txBody"][0]["a:p"]');
-                let parsedParagraph = ParagraphParser.extractParagraphElements(paragraphInfo);
+                let parsedParagraph = ParagraphParser.extractParagraphElements(paragraphInfo, false);
                 //edge case to handle the empty cell, without this check it will be sent as { paragraph: { content: [], ....}}
                 //and that is considered as line break in our renderer
                 if (parsedParagraph.length === 1 && isEmpty(parsedParagraph[0].content)) {

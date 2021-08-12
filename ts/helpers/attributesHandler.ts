@@ -1,18 +1,24 @@
-export const getAttributeByPath = (slideAttributes, pathArray: string[]) => {
+export const getAttributeByPath = (slideAttributes, pathArray: string[], returnValue = undefined) => {
     if (pathArray.length === 0) {
-        //TODO: catch this error
-        throw Error("Invalid path");
+        return returnValue;
     }
 
     if (slideAttributes === undefined) {
-        return undefined;
+        return returnValue;
     }
 
     for (const node of pathArray) {
-        slideAttributes = slideAttributes[node] || slideAttributes[0][node];
-        if (slideAttributes === undefined) {
-            return [];
+        if (Array.isArray(slideAttributes)) {
+            slideAttributes = slideAttributes[0];
         }
+        slideAttributes = slideAttributes[node];
+        if (slideAttributes === undefined) {
+            return returnValue;
+        }
+    }
+
+    if (Array.isArray(returnValue)) {
+        return Array.isArray(slideAttributes) ? slideAttributes : [];
     }
 
     return slideAttributes;
