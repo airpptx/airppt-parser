@@ -69,9 +69,9 @@ export default class SlideParser {
                 if (Array.isArray(targetNode)) {
                     for (const node of targetNode) {
                         const nvSpPrNode = node["p:nvSpPr"];
-                        const id = getAttributeByPath(nvSpPrNode[0], ["p:cNvPr", "$", "id"]);
-                        const idx = getAttributeByPath(nvSpPrNode[0], ["p:nvPr", "p:ph", "$", "idx"]);
-                        const type = getAttributeByPath(nvSpPrNode[0], ["p:nvPr", "p:ph", "$", "type"]);
+                        const id = getAttributeByPath(nvSpPrNode, ["p:cNvPr", "$", "id"]);
+                        const idx = getAttributeByPath(nvSpPrNode, ["p:nvPr", "p:ph", "$", "idx"]);
+                        const type = getAttributeByPath(nvSpPrNode, ["p:nvPr", "p:ph", "$", "type"]);
 
                         if (id !== undefined) {
                             idTable[id] = node;
@@ -85,9 +85,9 @@ export default class SlideParser {
                     }
                 } else {
                     const nvSpPrNode = targetNode["p:nvSpPr"];
-                    const id = getAttributeByPath(nvSpPrNode[0], ["p:cNvPr", "$", "id"]);
-                    const idx = getAttributeByPath(nvSpPrNode[0], ["p:nvPr", "p:ph", "$", "idx"]);
-                    const type = getAttributeByPath(nvSpPrNode[0], ["p:nvPr", "p:ph", "$", "type"]);
+                    const id = getAttributeByPath(nvSpPrNode, ["p:cNvPr", "$", "id"]);
+                    const idx = getAttributeByPath(nvSpPrNode, ["p:nvPr", "p:ph", "$", "idx"]);
+                    const type = getAttributeByPath(nvSpPrNode, ["p:nvPr", "p:ph", "$", "type"]);
 
                     if (id !== undefined) {
                         idTable[id] = targetNode;
