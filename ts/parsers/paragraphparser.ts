@@ -118,6 +118,11 @@ export default class ParagraphParser {
                 i--;
             }
         }
+
+        if (list.listItems.length > 1 && list.listItems[list.listItems.length - 1].list) {
+            this.restructureList(list.listItems[list.listItems.length - 1].list);
+        }
+
         return list;
     }
 
@@ -212,6 +217,7 @@ export default class ParagraphParser {
                     paragraph.list = this.restructureList(paragraph.list);
                     allParagraphs.push(cloneDeep(paragraph));
                     paragraph.list.listItems = [];
+                    currentLevel = -1;
                 }
                 //normal paragraph content
                 parsedParagraph && allParagraphs.push(parsedParagraph);
