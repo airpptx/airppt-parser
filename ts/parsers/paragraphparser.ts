@@ -115,12 +115,8 @@ export default class ParagraphParser {
             if (list.listItems[i + 1].list) {
                 list.listItems[i]["list"] = list.listItems[i + 1].list;
                 list.listItems.splice(i + 1, 1);
-                i--;
+                this.restructureList(list.listItems[i].list);
             }
-        }
-
-        if (list.listItems.length > 1 && list.listItems[list.listItems.length - 1].list) {
-            this.restructureList(list.listItems[list.listItems.length - 1].list);
         }
 
         return list;
