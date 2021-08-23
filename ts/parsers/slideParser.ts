@@ -1,7 +1,8 @@
 import * as format from "string-template";
-import { SCHEMAS_URI } from "../utils/constants";
+import { GROUPS_LIMIT, SCHEMAS_URI } from "../utils/constants";
 import { getAttributeByPath, ZipHandler } from "../helpers";
 import { GraphicFrameParser, PowerpointElementParser } from "./";
+import * as isEmpty from "lodash.isempty";
 
 export default class SlideParser {
     public static async getSlideLayout(slideRelations) {
@@ -107,6 +108,24 @@ export default class SlideParser {
         }
     }
 
+    public static getGroupedNodes(rootGroupNode, groupCount = 0, groupedShapes = [], groupedImages = []) {
+        groupCount++;
+        if (rootGroupNode["p:sp"]) {
+            groupedShapes.push(...rootGroupNode["p:sp"]);
+        }
+        if (rootGroupNode["p:pic"]) {
+            groupedImages.push(...rootGroupNode["p:pic"]);
+        }
+        const subGroups = rootGroupNode["p:grpSp"];
+        if (subGroups && Array.isArray(subGroups) && groupCount <= GROUPS_LIMIT) {
+            subGroups.forEach((subGroup) => {
+                this.getGroupedNodes(subGroup, groupCount, groupedShapes, groupedImages);
+            });
+        }
+
+        return { groupedShapes, groupedImages };
+    }
+
     public static async getSlideElements(PPTElementParser: PowerpointElementParser, slideNumber): Promise<any[]> {
         //Get all of Slide Shapes and Elements
         const slideAttributes = await ZipHandler.parseSlideAttributes(format("ppt/slides/slide{0}.xml", slideNumber));
@@ -119,6 +138,14 @@ export default class SlideParser {
         const slideShapes = getAttributeByPath(slideData, ["p:spTree", "p:sp"], []);
         const slideImages = getAttributeByPath(slideData, ["p:spTree", "p:pic"], []);
         const graphicFrames = getAttributeByPath(slideData, ["p:spTree", "p:graphicFrame"], []);
+
+        const groupedContent = getAttributeByPath(slideData, ["p:spTree", "p:grpSp"], []);
+        groupedContent.forEach((group) => {
+            const { groupedShapes, groupedImages } = this.getGroupedNodes(group);
+            slideShapes.push(...groupedShapes);
+            slideImages.push(...groupedImages);
+        });
+
         const slideTables = GraphicFrameParser.processGraphicFrameNodes(graphicFrames);
 
         const allSlideElements = [...slideShapes, ...slideImages, ...slideTables];

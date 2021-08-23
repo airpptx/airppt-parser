@@ -7,3 +7,5 @@ export const SCHEMAS_URI = {
 };
 
 export const SUPPORTED_PLACEHOLDERS = ["body", "ctrTitle", "pic", "subTitle", "tbl", "title"];
+
+export const GROUPS_LIMIT = 20;
