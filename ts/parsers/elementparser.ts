@@ -97,6 +97,12 @@ class PowerpointElementParser {
             }
             this.element = rawElement;
             const specialityType = ShapeParser.determineSpecialityType(this.element);
+
+            //throwout unsupported content: for example charts, graphs etc
+            if (specialityType === SpecialityType.None) {
+                return null;
+            }
+
             const nodeName = ELEMENTS_ROOT_NODE[specialityType];
             this.setLayoutSpNodes(slideLayoutTables, slideMasterTables, nodeName);
 
@@ -138,6 +144,11 @@ class PowerpointElementParser {
                 shape: ShapeParser.extractShapeElements(this.element),
                 links: SlideRelationsParser.resolveShapeHyperlinks(this.element)
             };
+
+            //throwout paragraph elements which are empty e.g shapes with no text
+            if (specialityType === SpecialityType.Paragraph && isEmpty(pptElement.paragraph)) {
+                return null;
+            }
 
             pptElement = cleanupJson(pptElement);
 

@@ -1,11 +1,11 @@
+import { join } from "path";
 import * as format from "string-template";
 import { GROUPS_LIMIT, SCHEMAS_URI } from "../utils/constants";
-import { getAttributeByPath, ZipHandler } from "../helpers";
+import { getAttributeByPath, FileHandler } from "../helpers";
 import { GraphicFrameParser, PowerpointElementParser } from "./";
-import * as isEmpty from "lodash.isempty";
 
 export default class SlideParser {
-    public static async getSlideLayout(slideRelations) {
+    public static async getSlideLayout(slideRelations, pptFilePath) {
         // Read relationship filename of the slide (Get slideLayoutXX.xml)
         // @sldFileName: ppt/slides/slide1.xml
         // @resName: ppt/slides/_rels/slide1.xml.rels
@@ -22,14 +22,14 @@ export default class SlideParser {
             layoutFilename = relationshipArray["$"]["Target"].replace("../", "ppt/");
         }
         // Open slideLayoutXX.xml
-        const slideLayoutContent = await ZipHandler.parseSlideAttributes(layoutFilename);
+        const slideLayoutContent = await FileHandler.parseContentFromFile(join(pptFilePath, layoutFilename));
 
         // Read slide master filename of the slidelayout (Get slideMasterXX.xml)
         // @resName: ppt/slideLayouts/slideLayout1.xml
         // @masterName: ppt/slideLayouts/_rels/slideLayout1.xml.rels
         const slideLayoutResFilename =
             layoutFilename.replace("slideLayouts/slideLayout", "slideLayouts/_rels/slideLayout") + ".rels";
-        const slideLayoutResContent = await ZipHandler.parseSlideAttributes(slideLayoutResFilename);
+        const slideLayoutResContent = await FileHandler.parseContentFromFile(join(pptFilePath, slideLayoutResFilename));
         relationshipArray = slideLayoutResContent["Relationships"]["Relationship"];
         let masterFilename = "";
         if (Array.isArray(relationshipArray)) {
@@ -43,7 +43,7 @@ export default class SlideParser {
             masterFilename = relationshipArray["$"]["Target"].replace("../", "ppt/");
         }
         // Open slideMasterXX.xml
-        const slideMasterContent = await ZipHandler.parseSlideAttributes(masterFilename);
+        const slideMasterContent = await FileHandler.parseContentFromFile(join(pptFilePath, masterFilename));
 
         return {
             slideLayoutTables: this.indexNodes(slideLayoutContent),
@@ -126,45 +126,55 @@ export default class SlideParser {
         return { groupedShapes, groupedImages };
     }
 
-    public static async getSlideElements(PPTElementParser: PowerpointElementParser, slideNumber): Promise<any[]> {
-        //Get all of Slide Shapes and Elements
-        const slideAttributes = await ZipHandler.parseSlideAttributes(format("ppt/slides/slide{0}.xml", slideNumber));
-        //Contains references to links,images and etc on a Slide
-        const slideRelations = await ZipHandler.parseSlideAttributes(
-            format("ppt/slides/_rels/slide{0}.xml.rels", slideNumber)
-        );
-        const { slideMasterTables, slideLayoutTables } = await this.getSlideLayout(slideRelations);
-        const slideData = slideAttributes["p:sld"]["p:cSld"];
-        const slideShapes = getAttributeByPath(slideData, ["p:spTree", "p:sp"], []);
-        const slideImages = getAttributeByPath(slideData, ["p:spTree", "p:pic"], []);
-        const graphicFrames = getAttributeByPath(slideData, ["p:spTree", "p:graphicFrame"], []);
-
-        const groupedContent = getAttributeByPath(slideData, ["p:spTree", "p:grpSp"], []);
-        groupedContent.forEach((group) => {
-            const { groupedShapes, groupedImages } = this.getGroupedNodes(group);
-            slideShapes.push(...groupedShapes);
-            slideImages.push(...groupedImages);
-        });
-
-        const slideTables = GraphicFrameParser.processGraphicFrameNodes(graphicFrames);
-
-        const allSlideElements = [...slideShapes, ...slideImages, ...slideTables];
-        const allParsedSlideElements = [];
-
-        for (const slideElement of allSlideElements) {
-            const pptElement = PPTElementParser.getProcessedElement(
-                slideElement,
-                slideLayoutTables,
-                slideMasterTables,
-                slideRelations
+    public static async getSlideElements(
+        PPTElementParser: PowerpointElementParser,
+        slideNumber,
+        pptFilePath: string
+    ): Promise<any[]> {
+        try {
+            //Get all of Slide Shapes and Elements
+            const slideAttributes = await FileHandler.parseContentFromFile(
+                join(pptFilePath, format("ppt/slides/slide{0}.xml", slideNumber))
             );
+            //Contains references to links,images, audios, videos etc on a Slide
+            const slideRelations = await FileHandler.parseContentFromFile(
+                join(pptFilePath, format("ppt/slides/_rels/slide{0}.xml.rels", slideNumber))
+            );
+            const { slideMasterTables, slideLayoutTables } = await this.getSlideLayout(slideRelations, pptFilePath);
+            const slideData = slideAttributes["p:sld"]["p:cSld"];
+            const slideShapes = getAttributeByPath(slideData, ["p:spTree", "p:sp"], []);
+            const slideImages = getAttributeByPath(slideData, ["p:spTree", "p:pic"], []);
+            const graphicFrames = getAttributeByPath(slideData, ["p:spTree", "p:graphicFrame"], []);
 
-            //throwout any undrenderable content
-            if (pptElement) {
-                allParsedSlideElements.push(pptElement);
+            const groupedContent = getAttributeByPath(slideData, ["p:spTree", "p:grpSp"], []);
+            groupedContent.forEach((group) => {
+                const { groupedShapes, groupedImages } = this.getGroupedNodes(group);
+                slideShapes.push(...groupedShapes);
+                slideImages.push(...groupedImages);
+            });
+
+            const slideTables = GraphicFrameParser.processGraphicFrameNodes(graphicFrames);
+
+            const allSlideElements = [...slideShapes, ...slideImages, ...slideTables];
+            const allParsedSlideElements = [];
+
+            for (const slideElement of allSlideElements) {
+                const pptElement = PPTElementParser.getProcessedElement(
+                    slideElement,
+                    slideLayoutTables,
+                    slideMasterTables,
+                    slideRelations
+                );
+
+                //throwout any undrenderable content
+                if (pptElement) {
+                    allParsedSlideElements.push(pptElement);
+                }
             }
-        }
 
-        return allParsedSlideElements;
+            return allParsedSlideElements;
+        } catch (error) {
+            throw error;
+        }
     }
 }

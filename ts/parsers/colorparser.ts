@@ -103,8 +103,6 @@ export default class ColorParser {
         if (!themeClr) {
             return null;
         }
-
-        console.log("looking up theme clr");
         const colors = this.slideShowTheme["a:theme"]["a:themeElements"][0]["a:clrScheme"][0];
         const targetTheme = "a:" + themeClr;
         if (targetTheme in colors) {

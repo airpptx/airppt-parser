@@ -1,4 +1,4 @@
 import { getAttributeByPath } from "./attributesHandler";
 import { getValueAtPath, checkPath } from "./checkObj";
-import ZipHandler from "./zipHandler";
-export { getAttributeByPath, checkPath, getValueAtPath, ZipHandler };
+import FileHandler from "./filehandler";
+export { getAttributeByPath, checkPath, getValueAtPath, FileHandler };
