@@ -127,6 +127,8 @@ class PowerpointElementParser {
             const paragraphInfo = getValueAtPath(this.element, '["p:txBody"][0]["a:p"]');
             const isPlaceholderList = this.isPlaceholderListElement();
 
+            const elementDescr = getValueAtPath(this.element, '["p:nvPicPr"][0]["p:cNvPr"][0]["$"]["descr"]');
+
             let pptElement: PowerpointElement = {
                 name: elementName,
                 shapeType: ShapeParser.determineShapeType(elementPresetType),
@@ -142,7 +144,8 @@ class PowerpointElementParser {
                 table: !isEmpty(table) && !isEmpty(table.rows) ? table : null,
                 paragraph: ParagraphParser.extractParagraphElements(paragraphInfo, isPlaceholderList),
                 shape: ShapeParser.extractShapeElements(this.element),
-                links: SlideRelationsParser.resolveShapeHyperlinks(this.element)
+                links: SlideRelationsParser.resolveShapeHyperlinks(this.element),
+                description: elementDescr
             };
 
             //throwout paragraph elements which are empty e.g shapes with no text
