@@ -145,7 +145,7 @@ class PowerpointElementParser {
                 paragraph: ParagraphParser.extractParagraphElements(paragraphInfo, isPlaceholderList),
                 shape: ShapeParser.extractShapeElements(this.element),
                 links: SlideRelationsParser.resolveShapeHyperlinks(this.element),
-                description: elementDescr
+                altText: elementDescr
             };
 
             //throwout paragraph elements which are empty e.g shapes with no text
