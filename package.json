@@ -26,7 +26,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@types/node": "^15.12.2",
-		"airppt-models-plus": "^1.0.0",
+		"airppt-models-plus": "^1.1.0",
 		"lodash.clonedeep": "^4.5.0",
 		"lodash.get": "^4.4.2",
 		"lodash.has": "^4.5.2",
