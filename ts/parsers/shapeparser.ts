@@ -13,6 +13,14 @@ export default class ShapeParser {
 
     public static determineSpecialityType(element): SpecialityType {
         if (element["p:nvPicPr"]) {
+            if (checkPath(element, '["p:nvPicPr"][0]["p:nvPr"][0]["a:videoFile"]')) {
+                return SpecialityType.Video;
+            }
+
+            if (checkPath(element, '["p:nvPicPr"][0]["p:nvPr"][0]["a:audioFile"]')) {
+                return SpecialityType.Audio;
+            }
+
             return SpecialityType.Image;
         }
 

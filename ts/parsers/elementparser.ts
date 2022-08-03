@@ -9,6 +9,8 @@ const ELEMENTS_ROOT_NODE = {
     [SpecialityType.Paragraph]: "p:nvSpPr",
     [SpecialityType.Title]: "p:nvSpPr",
     [SpecialityType.Image]: "p:nvPicPr",
+    [SpecialityType.Audio]: "p:nvPicPr",
+    [SpecialityType.Video]: "p:nvPicPr",
     [SpecialityType.Table]: "p:nvGraphicFramePr"
 };
 
@@ -132,7 +134,7 @@ class PowerpointElementParser {
             let pptElement: PowerpointElement = {
                 name: elementName,
                 shapeType: ShapeParser.determineShapeType(elementPresetType),
-                specialityType: ShapeParser.determineSpecialityType(this.element),
+                specialityType: specialityType,
                 elementPosition: {
                     x: position?.x,
                     y: position?.y
@@ -144,7 +146,7 @@ class PowerpointElementParser {
                 table: !isEmpty(table) && !isEmpty(table.rows) ? table : null,
                 paragraph: ParagraphParser.extractParagraphElements(paragraphInfo, isPlaceholderList),
                 shape: ShapeParser.extractShapeElements(this.element),
-                links: SlideRelationsParser.resolveShapeHyperlinks(this.element),
+                links: SlideRelationsParser.resolveShapeHyperlinks(this.element, specialityType),
                 altText: elementDescr
             };
 
