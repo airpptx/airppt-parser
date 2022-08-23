@@ -235,7 +235,7 @@ export default class ParagraphParser {
             fontAttributes: [],
             font: "Helvetica",
             fillColor: "000000",
-            backgroundColor: ""
+            highlightColor: ""
         };
 
         if (!textProperties) {
@@ -247,7 +247,7 @@ export default class ParagraphParser {
             fontAttributes: this.determineFontAttributes(textProperties["$"]) || defaultProperties.fontAttributes,
             font: getValueAtPath(textProperties, '["a:latin"][0]["$"]["typeface"]') || defaultProperties.font,
             fillColor: ColorParser.getTextColors(textProperties) || defaultProperties.fillColor,
-            backgroundColor: getValueAtPath(textProperties, '["a:highlight"][0]["a:srgbClr"][0].$.val').trim() || defaultProperties.backgroundColor
+            highlightColor: getValueAtPath(textProperties, '["a:highlight"][0]["a:srgbClr"][0].$.val').trim() || defaultProperties.highlightColor
         };
     }
 
