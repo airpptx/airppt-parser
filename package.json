@@ -1,6 +1,6 @@
 {
 	"name": "airppt-parser-plus",
-	"version": "1.3.3",
+	"version": "1.4.0",
 	"description": "Parses Powerpoint (PPTX) to Standardized JSON Objects",
 	"main": "js/main.js",
 	"types": "js/main.d.ts",
@@ -26,7 +26,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@types/node": "^15.12.2",
-		"airppt-models-plus": "^1.1.1",
+		"airppt-models-plus": "^1.2.0",
 		"lodash.clonedeep": "^4.5.0",
 		"lodash.get": "^4.4.2",
 		"lodash.has": "^4.5.2",
