@@ -1,6 +1,5 @@
 //require("module-alias/register");
 import { PowerpointDetails } from "airppt-models-plus/pptdetails";
-import { rejects } from "assert";
 import { PowerpointElementParser, PptGlobalsParser, SlideParser } from "./parsers";
 
 export class AirParser {
@@ -11,6 +10,7 @@ export class AirParser {
             try {
                 const pptElementParser = new PowerpointElementParser();
                 const slidesLength = await PptGlobalsParser.getSlidesLength(this.PowerpointFilePath);
+                const slidesSections = await PptGlobalsParser.getSections(this.PowerpointFilePath);
                 const allSlides = [];
 
                 for (let i = 1; i <= slidesLength; i++) {
@@ -29,6 +29,7 @@ export class AirParser {
                     resolve({
                         powerPointElements: pptElements,
                         inputPath: this.PowerpointFilePath,
+                        sections: slidesSections,
                         slidesLength
                     });
                 });
